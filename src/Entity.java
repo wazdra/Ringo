@@ -134,21 +134,25 @@ public class Entity {
     }
 
     public void receiveUDP(Selector selector, DatagramChannel chanel){
-        ByteBuffer buff = ByteBuffer.allocate(messageMaxLength);
-        selector.select();
-        Iterator<SelectionKey> it = selector.selectedKeys().iterator();
-        while(it.hasNext()){
-            SelectionKey sk = it.next();
-            it.remove();
-            if(sk.isReadable() && sk.channel() == chanel){
-                chanel.receive(buff);
-                String st = new String(buff.array(),0,buff.array().length);
-                buff.clear();
-                System.out.println("Message :" + st);
-            } else{
-                System.out.println("Que s'est il passe");
+        try{
+            ByteBuffer buff = ByteBuffer.allocate(messageMaxLength);
+            selector.select();
+            Iterator<SelectionKey> it = selector.selectedKeys().iterator();
+            while(it.hasNext()){
+                SelectionKey sk = it.next();
+                it.remove();
+                if(sk.isReadable() && sk.channel() == chanel){
+                    chanel.receive(buff);
+                    String st = new String(buff.array(),0,buff.array().length);
+                    buff.clear();
+                    System.out.println("Message :" + st);
+                } else{
+                    System.out.println("Que s'est il passe");
+                }
             }
-        }
+        } catch (Exception e){
+
+        }      
     }
 
     public void receiveAll(){
@@ -156,10 +160,10 @@ public class Entity {
             Selector selector = Selector.open();
             DatagramChannel chanel = DatagramChannel.open();
             chanel.configureBlocking(false);
-            chanel.bind(new InetSocketAddress(portUDP));
-            chanel.register(sel,SelectionKey.OP_READ);
+            chanel.bind(new InetSocketAddress(this.portUDP));
+            chanel.register(selector,SelectionKey.OP_READ);
             while(true){
-                receiveUPD(selector,chanel,buff);
+                receiveUDP(selector,chanel);
             }  
         }
         catch (Exception e){
