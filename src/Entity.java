@@ -143,16 +143,41 @@ public class Entity {
                 it.remove();
                 if(sk.isReadable() && sk.channel() == chanel){
                     chanel.receive(buff);
-                    String st = new String(buff.array(),0,buff.array().length);
+                    String message = new String(buff.array(),0,buff.array().length);
                     buff.clear();
-                    System.out.println("Message :" + st);
+                    String type = message.substring(0,3);
+                    switch(type){
+                        case "APPL":
+                            String[] st = message.split(" ",4);
+                            String idm = st[1];
+                            int idApp = Integer.parseInt(st[2]);
+                            String mess = st[3];
+                            break;
+                    }
+                    
                 } else{
-                    System.out.println("Que s'est il passe");
+                    System.out.println("wtf");
                 }
             }
         } catch (Exception e){
 
         }      
+    }
+
+    public void sendUDP(String ip, int port, String request){
+        try{
+            DatagramSocket dso = new DatagramSocket();
+            byte[] data;
+            data = request.getBytes();
+            DatagramPacket paquet = new DatagramPacket(data,data.length,new InetSocketAddress(ip,port));
+            dso.send(paquet);
+        } catch(Exception e){
+            e.printStackTrace();
+        }
+    }
+
+    public String getAppRequest(int idApp, String messageApp){
+        return "APPL " + generateIDM() + " " + idApp + " " + messageApp;
     }
 
     public void receiveAll(){
