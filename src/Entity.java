@@ -1,23 +1,43 @@
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
-import java.io.PrintWriter;
+import java.util.*;
+import java.io.*;
+import java.nio.channels.*;
+import java.nio.*;
 import java.net.*;
+import java.lang.*;
 
 public class Entity {
+    protected static final int messageMaxLength = 512;
+    protected ServiceTCP tcpserv;
+    protected String id; // Au plus 8 caractères
+    protected int portUDP; // < 9999
+    protected boolean connected;
+    protected boolean duplicated; //Indique si l'entité est en duplication
+    protected InetSocketAddress dupl;
+    // Multi difusion : toutes les entités d'un anneau possèdent la même addresse + port
+    protected InetSocketAddress multidif; // Le port UDP de multi dif < 9999
+
+    public boolean getConnected(){
+        return connected;
+    }
+
     public class ServiceTCP implements Runnable{
+
         public int portTCP;
         public InetSocketAddress next;
         protected InetSocketAddress multidif; // Le port UDP de multi dif < 9999
         public boolean duplicated;
+
         public ServiceTCP(int portTCP,int portUDP){
-            duplicated= false;
             multidif = null;
             this.portTCP = portTCP;
-            try{next = new InetSocketAddress(InetAddress.getLocalHost(),portUDP);}
-            catch(Exception e){//TO DO
-                 }
+            try{
+                next = new InetSocketAddress(InetAddress.getLocalHost(),portUDP);
+            }
+            catch(Exception e){
+                
+            }
         }
+
         public void run(){
             try{
                 ServerSocket ss = new ServerSocket(portTCP);
@@ -44,29 +64,21 @@ public class Entity {
                 }
             }
             catch(Exception e){
+                
             }
         }
     }
+
     public class ConnectionException extends Exception{
         public ConnectionException(String message){
             super(message);
         }
     }
 
-    protected ServiceTCP tcpserv;
-    protected String id; // Au plus 8 caractères
-    protected int portUDP; // < 9999
-    protected boolean connected;
-    protected boolean duplicated; //Indique si l'entité est en duplication
-    protected InetSocketAddress dupl;
-    // Multi difusion : toutes les entités d'un anneau possèdent la même addresse + port
-    protected InetSocketAddress multidif; // Le port UDP de multi dif < 9999
-
-
     public Entity(String identifiant, int portTCP, int portUDP, String ip) {
         this.id = identifiant;
         this.portUDP = portUDP;
-        this.tcpserv = new ServiceTCP(
+        this.tcpserv = new ServiceTCP(portTCP,portUDP);
         this.dupl = null;
         this.multidif = null;
         duplicated = false;
@@ -75,7 +87,6 @@ public class Entity {
 
 
     public void parseWelc(String msg) throws ConnectionException {
-        // TO DO : modifier le next, et les ip et port de multidiff
         String[] ts = msg.split(" ");
         if (ts.length!=4){
             throw new ConnectionException("Mauvais comportement");
@@ -84,13 +95,12 @@ public class Entity {
             throw new ConnectionException("Mauvais comportement");
         }
         try{
-            this.next =  new InetSocketAddress(ts[1], Integer.parseInt(ts[2]));
+            this.tcpserv.next =  new InetSocketAddress(ts[1], Integer.parseInt(ts[2]));
             this.multidif = new InetSocketAddress(ts[3], Integer.parseInt(ts[4]));
         } catch (Exception e) {
             throw new ConnectionException("Mauvais comportement");
         }
     }
-
 
     public void connect(String masterIP, int portTCP) throws ConnectionException {
         try {
@@ -109,54 +119,51 @@ public class Entity {
             if (msg!="ACKC\n") {
                 throw new ConnectionException("Problème de connection TCP");
             }
-            br.close();
-            connection.close();
             else{
                 this.connected = true;
             }
+            br.close();
+            connection.close();
         } catch (Exception e) {
-
+            throw new ConnectionException("Mauvais comportement");
         }
     }
 
+    public String generateIDM(){
+        return ""; // TO DO
+    }
 
-    //--------------------------------
-    //--------------------------------
-    //--------------------------------
-    // MAIN
-    //--------------------------------
-    //--------------------------------
-    //--------------------------------
-
-    public static void main(String[] args) {
-        if (args.length == 3) {
-            Entity entity;
-            try {
-                String identifiant = args[0];
-                if (identifiant.length() > 8) {
-                    System.out.println("Error while creating : the identifiant is not between 1 and 8 length");
-                    return;
-                }
-                String ip = args[1];
-                if (! Ring.checkIPv4(ip)) {
-                    System.out.println("Error while creating : the ip is not correct");
-                    return;
-                }
-                int port = Integer.parseInt(args[2]);
-
-                try {
-                    Socket socket = new Socket(ip, port);
-                    socket.close();
-                } catch (Exception e) {
-                    System.out.println("Error : Fail to connect : " + e);
-                }
-
-            } catch (NumberFormatException e) {
-                System.out.println("Error while creating : the port is not a int");
-            } catch (Exception e) {
+    public void receiveUDP(Selector selector, DatagramChannel chanel){
+        ByteBuffer buff = ByteBuffer.allocate(messageMaxLength);
+        selector.select();
+        Iterator<SelectionKey> it = selector.selectedKeys().iterator();
+        while(it.hasNext()){
+            SelectionKey sk = it.next();
+            it.remove();
+            if(sk.isReadable() && sk.channel() == chanel){
+                chanel.receive(buff);
+                String st = new String(buff.array(),0,buff.array().length);
+                buff.clear();
+                System.out.println("Message :" + st);
+            } else{
+                System.out.println("Que s'est il passe");
             }
-        } else {
-            System.out.println("Error : Wrong number of arguments.\nHere is the syntax : java Entity [identifiant] [IP] [portTCP]");
         }
+    }
+
+    public void receiveAll(){
+        try{
+            Selector selector = Selector.open();
+            DatagramChannel chanel = DatagramChannel.open();
+            chanel.configureBlocking(false);
+            chanel.bind(new InetSocketAddress(portUDP));
+            chanel.register(sel,SelectionKey.OP_READ);
+            while(true){
+                receiveUPD(selector,chanel,buff);
+            }  
+        }
+        catch (Exception e){
+
+        } 
     }
 }
