@@ -5,6 +5,7 @@ import java.nio.*;
 import java.net.*;
 import java.lang.*;
 
+
 public class Entity {
     protected static final int messageMaxLength = 512;
     protected ServiceTCP tcpserv;
@@ -130,6 +131,9 @@ public class Entity {
     }
 
     public String generateIDM(){
+        long t = System.currentTimeMillis();
+        //t = t % Math.pow(256,5);
+        int r = (int)(Math.random()*Math.pow(256,3));
         return ""; // TO DO
     }
 
