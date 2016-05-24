@@ -132,8 +132,9 @@ public class Entity {
 
     public String generateIDM(){
         long t = System.currentTimeMillis();
-        //t = t % Math.pow(256,5);
-        int r = (int)(Math.random()*Math.pow(256,3));
+        t = t % (256*256*256*256*256);
+        int r = (int)(Math.random()*(256*256*256));
+	t = t+(256*256*256*256*256*r);
         return ""; // TO DO
     }
 
