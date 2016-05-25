@@ -9,7 +9,7 @@ import java.lang.*;
 public class Entity {
     protected static final int messageMaxLength = 512;
     protected ServiceTCP tcpserv;
-    protected String id; // Au plus 8 caractères
+    protected long id; //Une des particularités de java : un long fait toujours 8 bytes.
     protected int portUDP; // < 9999
     protected boolean connected;
     protected boolean duplicated; //Indique si l'entité est en duplication
@@ -76,8 +76,8 @@ public class Entity {
         }
     }
 
-    public Entity(String identifiant, int portTCP, int portUDP, String ip) {
-        this.id = identifiant;
+    public Entity(int portTCP, int portUDP) {
+        this.id = generateIDM();
         this.portUDP = portUDP;
         this.tcpserv = new ServiceTCP(portTCP,portUDP);
         this.dupl = null;
@@ -130,12 +130,29 @@ public class Entity {
         }
     }
 
-    public String generateIDM(){
+    public long generateIDM(){//génération de l'identifiant pseudo-unique
+	/* On utilisera 5 bytes de temps, donné par java, à la milliseconde près.
+	   Ainsi, deux utilisateurs doivent se connecter précisément à la même milliseconde
+	   pour avoir le même identifiant. De plus, les 3 autres bits seront générés aléatoirement.
+	   Ainsi, deux utilisateurs se connectant à la même milliseconde n'ont qu'une probabilité
+	   1/(256^3) d'avoir le même identifiant.
+	 */
         long t = System.currentTimeMillis();
-        t = t % (256*256*256*256*256);
-        int r = (int)(Math.random()*(256*256*256));
-	t = t+(256*256*256*256*256*r);
-        return ""; // TO DO
+	byte[] randomness = new byte[3];
+	Random rg = new Random();
+	rg.nextBytes(randomness);
+	long mod = 256;
+	mod = mod*mod;
+	mod = mod*mod;
+	mod = mod*256;
+	t = t%mod;
+	t = t+(Byte.toUnsignedInt(randomness[0])*mod);
+	mod *= 256;
+	t = t+(Byte.toUnsignedInt(randomness[1])*mod);
+	mod *=256;
+	t = t+(Byte.toUnsignedInt(randomness[2])*mod);
+	System.out.println(t);//Mesure de test, à retirer à terme !
+	return t;
     }
 
     public void receiveUDP(Selector selector, DatagramChannel chanel){
