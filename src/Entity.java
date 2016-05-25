@@ -70,11 +70,7 @@ public class Entity {
         }
     }
 
-    public class ConnectionException extends Exception{
-        public ConnectionException(String message){
-            super(message);
-        }
-    }
+    
 
     public Entity(int portTCP, int portUDP) {
         this.id = generateIDM();
@@ -218,3 +214,4 @@ public class Entity {
         } 
     }
 }
+
