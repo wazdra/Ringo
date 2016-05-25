@@ -43,11 +43,12 @@ public class Invite{
 		if(parseur.length ==3 &&
 		   (properIp(parseur[1]) || parseur[1].equalsIgnoreCase("localhost"))){ 
 		    try{
-			entite.connect(parseur[1],Integer.parseInt(parseur[2]));
+			    entite.connect(parseur[1],Integer.parseInt(parseur[2]));
+                System.out.println("Connecté avec succès au ring de "+parseur[1]);
 		    }
 		    catch(Exception exc){
 			if(exc instanceof ConnectionException){
-			    System.out.println("La connection a été refusée");
+			    System.out.println("La connection a été refusée : "+exc.toString());
 			}
 			else if(exc instanceof NumberFormatException){
 			    System.out.println("Le deuxième argument doit être un port.");

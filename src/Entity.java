@@ -29,13 +29,18 @@ public class Entity {
         public boolean duplicated;
 
         public ServiceTCP(int portTCP,int portUDP){
-            multidif = null;
+            try{
+                multidif = new InetSocketAddress("0.0.0.0",12345);
+            }
+            catch(Exception e){
+                e.printStackTrace();
+            }
             this.portTCP = portTCP;
             try{
                 next = new InetSocketAddress(InetAddress.getLocalHost(),portUDP);
             }
             catch(Exception e){
-                
+                System.out.println("Can't get adress");
             }
         }
 
@@ -46,15 +51,17 @@ public class Entity {
                     Socket s = ss.accept();
                     PrintWriter pw = new PrintWriter(new OutputStreamWriter(s.getOutputStream()));
                     BufferedReader br = new BufferedReader(new InputStreamReader(s.getInputStream()));
+                    System.out.println("WELC "+next.getAddress().getHostAddress()+" "+ next.getPort()+" "+multidif.getAddress().getHostAddress()+" "+multidif.getPort());
                     pw.println("WELC "+next.getAddress().getHostAddress()+" "+ next.getPort()+" "+multidif.getAddress().getHostAddress()+" "+multidif.getPort());
                     pw.flush();
                     String msg = br.readLine();
+                    System.out.println(msg);
                     String[] ts = msg.split(" ");
                     if(ts.length!=3){
-                        throw new ConnectionException("Mauvais comportement");
+                        throw new ConnectionException("Mauvais comportement côté serveur, mauvais nombre d'arguments");
                     }
-                    if(ts[0]!="NEWC"){
-                        throw new ConnectionException("Mauvais comportement");
+                    if(!ts[0].equals("NEWC")){
+                        throw new ConnectionException("Mauvais comportement côté serveur, attendait NEWC");
                     }
                     this.next = new InetSocketAddress(ts[1],Integer.parseInt(ts[2]));
                     pw.println("ACKC");
@@ -80,22 +87,24 @@ public class Entity {
         this.multidif = null;
         duplicated = false;
         connected = false;
+        Thread t = new Thread(tcpserv);
+        t.start();
     }
 
 
     public void parseWelc(String msg) throws ConnectionException {
         String[] ts = msg.split(" ");
-        if (ts.length!=4){
-            throw new ConnectionException("Mauvais comportement");
+        if (ts.length!=5){
+            throw new ConnectionException("Mauvais comportement côté client : mauvais nombre d'arguments");
         }
-        if (ts[0] != "WELC") {
-            throw new ConnectionException("Mauvais comportement");
+        if (!ts[0].equals("WELC")) {
+            throw new ConnectionException("Mauvais comportement côté client : attendait WELC");
         }
         try{
             this.tcpserv.next =  new InetSocketAddress(ts[1], Integer.parseInt(ts[2]));
             this.multidif = new InetSocketAddress(ts[3], Integer.parseInt(ts[4]));
         } catch (Exception e) {
-            throw new ConnectionException("Mauvais comportement");
+            throw new ConnectionException("Mauvais comportement côté client : attendait des adresses et ports.");
         }
     }
 
@@ -111,9 +120,8 @@ public class Entity {
             parseWelc(msg);
             pw.println("NEWC " + InetAddress.getLocalHost().getHostAddress() + " " + portUDP);
             pw.flush();
-            pw.close();
             msg = br.readLine();
-            if (msg!="ACKC\n") {
+            if (!msg.equals("ACKC")) {
                 throw new ConnectionException("Problème de connection TCP");
             }
             else{
@@ -122,7 +130,12 @@ public class Entity {
             br.close();
             connection.close();
         } catch (Exception e) {
-            throw new ConnectionException("Mauvais comportement");
+            if (e instanceof ConnectionException) {
+                throw (ConnectionException) e;
+            } else {
+                e.printStackTrace();
+                throw new ConnectionException("Mauvais comportement");
+            }
         }
     }
 
