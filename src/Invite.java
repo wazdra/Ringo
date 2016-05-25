@@ -2,34 +2,26 @@ import java.io.*;
 import java.net.*;
 import java.util.*;
 import java.lang.*;
-import Entity.java;
 
 public class Invite{
-    public void InviteReseau(Entity e){
-	Boolean running = true;
-	String cmd;
-	Scanner sc = new Scanner(System.in);
-	String[] parseur;
-	if(e.getConnected()){
-	    System.out.println("Vous êtes connectés à un ring hôte.\n"+
-			       "Vous pouvez commencer à envoyer des données.\n"+
-			       "Utiliser help pour obtenir des informations sur les différentes commandes à votre disposition");
-	}
-	else{
-	    System.out.println("Vous avez créé votre propre ring.\n"+
-			       "Vous recevrez une notification lors d'une connexion extérieure.\n"+
-			       "Utiliser help pour obtenir des informations sur les différentes commandes à votre disposition");
-	}
-	while(running){
-	    System.out.print(">");
-	    cmd = sc.nextLine();
-	    switch(cmd){
-
-	    }
-	}
+    private static String msgs;
+    public synchronized void addMsg(String msg){
+	msgs = msgs+msg+"\n";
+    }
+    public synchronized void readMsg(){
+	System.out.print(msgs);
+	msgs = "";
     }
     public static void main(String args[]){
+	try{
+	    Entity e = new Entity(Integer.parseInt(args[0]),Integer.parseInt(args[1]));
+	}
+	catch(Exception exc){
+	    System.out.println("Veuillez rentrer en arguments, dans l'ordre, le port TCP et le port UDP de votre choix.");
+	    System.exit(-1);
+	}
 	String cmd;
+	msgs = "";
 	String[] parseur;
 	Boolean running = true;
 	System.out.println("Bienvenue. Pour une aide à l'utilisation, taper help");
