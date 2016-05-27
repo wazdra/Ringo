@@ -1,15 +1,11 @@
 public abstract class Application {
     protected String id;
-    protected String message;
     protected Entity entity;
 
     public static String getIdApp(String msg){
         return msg.substring(14,22);
     }
 
-    public static String getMsgApp(String msg){
-        return msg.substring(14,22);
-    }
 
 
     public static void handle(String msg, Entity e){
@@ -19,7 +15,7 @@ public abstract class Application {
             app.handleApp(msg);
         }
         else{
-            sendUDP(msg);
+            e.sendUDP(msg);
         }
     }
 

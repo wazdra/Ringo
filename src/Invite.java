@@ -72,8 +72,7 @@ public class Invite{
                     case "test": String tt = sc.nextLine();
                         System.out.println(Entity.getType(tt));
                         System.out.println(Entity.getIDM(tt));
-                        System.out.println(Entity.getIpMsg(tt,14));
-                        System.out.println(Entity.getIpMsg(tt,35));
+                        System.out.println(Application.getIdApp(tt));
                         break;
                     case "help" : System.out.println("Commandes disponibles : \n"+
                             "- connect [ip]\n"+

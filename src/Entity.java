@@ -44,6 +44,7 @@ public class Entity {
     protected ServiceTCP tcpserv;
     protected ServiceUDP udpserv;
     protected String ownip;
+    protected boolean disconnecting;
     protected String id; //Une des particularités de java : un long fait toujours 8 bytes.
     protected int portUDP; // < 9999
     protected boolean connected;
@@ -121,6 +122,7 @@ public class Entity {
     
 
     public Entity(String ip,int portTCP, int portUDP){
+        disconnecting = false;
         this.id = generateIDMs();
         this.portUDP = portUDP;
         this.tcpserv = new ServiceTCP(portTCP,portUDP);
@@ -189,15 +191,18 @@ public class Entity {
 
     public void sendDcRequest(){
         if(connected){
+            disconnecting = true;
             sendUDP("GBYE "+id+" "+ipToNW(ownip)+" "+portToNW(portUDP)+" "+ipToNW(next.getHostName())+" "+portToNW(next.getPort()));
         }
     }
 
     public void disconnect(){//À appeler lorsqu'on attend une réponse à une requête de déco.
-        try{
-            this.next = new InetSocketAddress(InetAddress.getLocalHost(),this.portUDP);
-            this.tcpserv.next = this.next;
-            connected = false;
+        try {
+            if (disconnecting) {
+                this.next = new InetSocketAddress(InetAddress.getLocalHost(), this.portUDP);
+                this.tcpserv.next = this.next;
+                connected = false;
+            }
         }
         catch(Exception e){
             System.out.print("Erreur dans disconnect : ");
