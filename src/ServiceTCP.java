@@ -22,12 +22,6 @@ public class ServiceTCP implements Runnable{
             e.printStackTrace();
         }
         this.portTCP = portTCP;
-        try{
-            next = new InetSocketAddress(InetAddress.getLocalHost(),portUDP);
-        }
-        catch(Exception e){
-            System.out.println("Can't get adress");
-        }
     }
 
     public void run(){
