@@ -116,8 +116,9 @@ public class Invite{
                 switch(cmd){
                     case "locinfo" :
                         try{System.out.println("Mon IP : "+getIPv4InetAddress().getHostAddress());}catch(Exception e){}
+                        break;
                     case "info":
-                        System.out.println("Connecté à "+entite.next.getHostName()+":"+entite.next.getPort());
+                        System.out.println("Connecté à "+entite.next.getAddress().getHostAddress()+":"+entite.next.getPort());
                         break;
                     case "test": String tt = sc.nextLine();
                         System.out.println(Entity.getType(tt));
