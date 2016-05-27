@@ -4,6 +4,25 @@ import java.util.*;
 import java.lang.*;
 
 public class Invite{
+    static private InetAddress getIPv4InetAddress() throws SocketException, UnknownHostException {
+
+        String os = System.getProperty("os.name").toLowerCase();
+
+        if(os.indexOf("nix") >= 0 || os.indexOf("nux") >= 0) {
+            NetworkInterface ni = NetworkInterface.getByName("eth0");
+
+            Enumeration<InetAddress> ias = ni.getInetAddresses();
+
+            InetAddress iaddress;
+            do {
+                iaddress = ias.nextElement();
+            } while(!(iaddress instanceof Inet4Address));
+
+            return iaddress;
+        }
+
+        return InetAddress.getLocalHost();  // for Windows and OS X it should work well
+    }
     private static Entity entite;
     private static String msg;
     public static synchronized void addMsg(String message){
@@ -96,7 +115,7 @@ public class Invite{
             else {
                 switch(cmd){
                     case "locinfo" :
-                        try{System.out.println("Mon IP : "+InetAddress.getLocalHost());}catch(Exception e){}
+                        try{System.out.println("Mon IP : "+getIPv4InetAddress().getHostAddress());}catch(Exception e){}
                     case "info":
                         System.out.println("Connecté à "+entite.next.getHostName()+":"+entite.next.getPort());
                         break;
