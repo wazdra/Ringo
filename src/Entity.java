@@ -9,7 +9,7 @@ import java.lang.*;
 
 public class Entity {
     public static byte[] longToBytes(long x) {
-        ByteBuffer buffer = ByteBuffer.allocate(Long.BYTES);
+        ByteBuffer buffer = ByteBuffer.allocate(8);//On pourra utiliser Long.BYTES plutôt que 8 en java1.8 .
         buffer.putLong(x);
         return buffer.array();
     }
@@ -211,11 +211,11 @@ public class Entity {
         mod = mod*mod;
 	    mod = mod*256;
 	    t = t%mod;
-	    t = t+(Byte.toUnsignedInt(randomness[0])*mod);
+	    t = t+(((int)randomness[0])*mod);
 	    mod *= 256;
-	    t = t+(Byte.toUnsignedInt(randomness[1])*mod);
+	    t = t+(((int)randomness[1])*mod);
 	    mod *=256;
-	    t = t+(Byte.toUnsignedInt(randomness[2])*mod);
+	    t = t+(((int)randomness[2])*mod);
 	    System.out.println(new String(longToBytes(t),0,8));//Mesure de test, à retirer à terme !
 	    return t;
     }
