@@ -20,4 +20,5 @@ public abstract class Application {
     }
 
     public abstract void handleApp(String msg);
+    public abstract void useApp();
 }
