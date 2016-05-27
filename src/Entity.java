@@ -289,7 +289,7 @@ public class Entity {
     }
 
     public static String getIDM(String msg){
-        return msg.substring(5,12);
+        return msg.substring(5,13);
     }
     public static String getIpMsg(String msg,int offset){
         return msg.substring(offset,offset+15);
