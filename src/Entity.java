@@ -251,11 +251,11 @@ public class Entity {
         mod = mod*mod;
 	    mod = mod*256;
 	    t = t%mod;
-	    t = t+(((int)randomness[0])*mod);
+	    t = t+((Math.abs((int) randomness[0])%64+32)*mod);
 	    mod *= 256;
-	    t = t+(((int)randomness[1])*mod);
+	    t = t+((Math.abs((int) randomness[1])%64+32)*mod);
 	    mod *=256;
-	    t = t+(((int)randomness[2])*mod);
+	    t = t+((Math.abs((int) randomness[2])%64+32)*mod);
 	    return t;
     }
     public void sendUDP(String request){
@@ -314,6 +314,7 @@ public class Entity {
         else{
             switch (getType(str)) {//TO DO
                 case "APPL":
+                    System.out.println(str+" dans le case APPL");
                     Application.handle(str,this);
                     break;
                 case "WHOS":

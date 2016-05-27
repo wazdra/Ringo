@@ -15,6 +15,7 @@ public class ListItemApp {
             return o==this;
         }
         else if(o instanceof String){
+            System.out.println(o);
             return o.equals(id);
         }
         return false;
