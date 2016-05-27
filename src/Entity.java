@@ -251,11 +251,11 @@ public class Entity {
         mod = mod*mod;
 	    mod = mod*256;
 	    t = t%mod;
-	    t = t+((Math.abs((int) randomness[0])%64+32)*mod);
+	    t = t+((Math.abs((int) randomness[0])+33)*mod);
 	    mod *= 256;
-	    t = t+((Math.abs((int) randomness[1])%64+32)*mod);
+	    t = t+((Math.abs((int) randomness[1])+33)*mod);
 	    mod *=256;
-	    t = t+((Math.abs((int) randomness[2])%64+32)*mod);
+	    t = t+((Math.abs((int) randomness[2])+33)*mod);
 	    return t;
     }
     public void sendUDP(String request){
