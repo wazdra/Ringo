@@ -210,11 +210,11 @@ public class Entity {
         }
     }
 
-    public String generateIDMs(){
+    public static String generateIDMs(){
         String s = new String(longToBytes(generateIDM()),0,8);
         return s;
     }
-    public long generateIDM(){//génération de l'identifiant pseudo-unique. Il servira aussi bien aux machines qu'aux messages
+    public static long generateIDM(){//génération de l'identifiant pseudo-unique. Il servira aussi bien aux machines qu'aux messages
 	/* On utilisera 5 bytes de temps, donné par java, à la milliseconde près.
 	   Ainsi, deux utilisateurs doivent se connecter précisément à la même milliseconde
 	   pour avoir le même identifiant. De plus, les 3 autres bits seront générés aléatoirement.
@@ -292,7 +292,7 @@ public class Entity {
         }
     }
 
-    public String getAppRequest(int idApp, String messageApp){
+    public static String getAppRequest(String idApp, String messageApp){
         return "APPL " + generateIDM() + " " + idApp + " " + messageApp;
     }
 
@@ -336,7 +336,7 @@ public class Entity {
         else{
             switch (getType(str)) {//TO DO
                 case "APPL":
-                    handleAPPL(str);
+                    Application.handle(str,this);
                     break;
                 case "WHOS":
                     sendUDP(str);
@@ -358,9 +358,6 @@ public class Entity {
                 default:
             }
         }
-    }
-    public void handleAPPL(String str){
-
     }
 }
 
