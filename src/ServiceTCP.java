@@ -9,6 +9,7 @@ import java.net.Socket;
 
 public class ServiceTCP implements Runnable{
     public int portTCP;
+    public int portUDP;
     public Entity ent;
     public InetSocketAddress next;
     protected InetSocketAddress multidif; // Le port UDP de multi dif < 9999
@@ -45,13 +46,21 @@ public class ServiceTCP implements Runnable{
                     if(ts.length!=3){
                         throw new ConnectionException("Mauvais comportement côté serveur, mauvais nombre d'arguments");
                     }
-                    if(!ts[0].equals("NEWC")){
+                    if(ts[0].equals("NEWC")) {
+                        ent.setNext(ts[1], Integer.parseInt(ts[2]));
+                        pw.println("ACKC");
+                        ent.setConnected(true);
+                        pw.flush();
+                    }
+                    else if(ts[0].equals("DUPL")){
+                        ent.setDupl(ts[1], Integer.parseInt(ts[2]));
+                        ent.setMultiDupl(ts[3],Integer.parseInt(ts[3]));
+                        pw.println("ACKD "+Entity.portToNW(portUDP));
+                    }
+                    else {
                         throw new ConnectionException("Mauvais comportement côté serveur, attendait NEWC");
                     }
-                    ent.setNext(ts[1],Integer.parseInt(ts[2]));
-                    pw.println("ACKC");
-                    ent.setConnected(true);
-                    pw.flush();
+
                 }
                 pw.close();
                 br.close();

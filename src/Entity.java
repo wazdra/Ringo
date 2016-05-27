@@ -45,6 +45,7 @@ public class Entity {
     public static final int messageMaxLength = 512;
     protected ArrayList<String> listIDS; //C'est la liste des messages en attente de récupération.
     protected ArrayList<ListItemApp> enabledApps;
+    protected ArrayList<String> listIDSdupl;
     protected ServiceTCP tcpserv;
     protected ServiceUDP udpserv;
     protected String ownip;
@@ -57,7 +58,7 @@ public class Entity {
     protected InetSocketAddress dupl;
     // Multi difusion : toutes les entités d'un anneau possèdent la même addresse + port
     protected InetSocketAddress multidif; // Le port UDP de multi dif < 9999
-
+    protected InetSocketAddress multidifdupl;
     public boolean getConnected(){
         return connected;
     }
@@ -89,6 +90,7 @@ public class Entity {
 
     public Entity(String ip,int portTCP, int portUDP){
         disconnecting = false;
+        multidifdupl = null;
         this.id = generateIDM();
         this.enabledApps = new ArrayList<>();
         this.listIDS = new ArrayList<>();
@@ -117,6 +119,18 @@ public class Entity {
     public void setConnected(Boolean b){
         connected=b;
     }
+    public synchronized void setMulti(String ip, int portUDP){
+        multidif = new InetSocketAddress(ip,portUDP);
+
+    }
+
+    public synchronized void setMultiDupl(String ip,int portUDP){
+        multidifdupl = new InetSocketAddress(ip,portUDP);
+    }
+    public synchronized void setDupl(String ip,int portUDP){
+        dupl = new InetSocketAddress(ip,portUDP);
+    }
+
     public synchronized void setNext(String ip,int portUDP){
         next = new InetSocketAddress(ip,portUDP);
         tcpserv.next = this.next;
@@ -177,7 +191,7 @@ public class Entity {
         }
     }
 
-    public void duplication(String masterIP, int portTCP) throws ConnectionException {
+    public void duplication(String masterIP, int portTCP, String multiIP, int portmult) throws ConnectionException {
         try {
             if (connected) {
                 throw new ConnectionException("Déja connecté");
@@ -191,7 +205,7 @@ public class Entity {
             }
             else{
                 parseWelc(msg);
-                pw.println("DUPL " + ipToNW(Invite.getIPv4InetAddress().getHostAddress()) + " " + portToNW(portUDP) + " ");
+                pw.println("DUPL " + ipToNW(Invite.getIPv4InetAddress().getHostAddress()) + " " + portToNW(portUDP) + " " + ipToNW(multiIP)+" "+portToNW(portmult));
                 pw.flush();
                 msg = br.readLine();
                 if (!msg.equals("ACKC")) {

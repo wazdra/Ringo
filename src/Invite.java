@@ -92,10 +92,11 @@ public class Invite{
             // DUPLICATION
             else if(cmd.startsWith("duplication")){
                 parseur = cmd.split(" ");
-                if(parseur.length ==3 &&
-                        (properIp(parseur[1]) || parseur[1].equalsIgnoreCase("localhost"))){
+                if(parseur.length ==5 &&
+                        (properIp(parseur[1]) || parseur[1].equalsIgnoreCase("localhost")) &&
+                        (properIp(parseur[3]))){
                     try{
-                        entite.duplication(parseur[1],Integer.parseInt(parseur[2]));
+                        entite.duplication(parseur[1],Integer.parseInt(parseur[2]),parseur[3],Integer.parseInt(parseur[4]));
                         System.out.println("Connecté avec succès au ring de "+parseur[1]);
                     }
                     catch(Exception exc){
