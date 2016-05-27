@@ -45,6 +45,11 @@ public class Message extends Application{
     }
 
     public void useApp(String msg){
-
+        if (msg.length() > 0 && msg.length() <= maxLength){
+            entity.sendUDP(entity.getAppRequest(this.id, "" + lengthToNW(msg.length()) + " " + msg));
+        }
+        else{
+            System.out.println("Message trop long");
+        }
     }
 }
