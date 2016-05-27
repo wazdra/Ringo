@@ -40,7 +40,9 @@ public class Entity {
     }
     public static final int messageMaxLength = 512;
     protected ArrayList<String> listIDS; //C'est la liste des messages en attente de récupération.
+    protected ArrayList<ListItemApp> enabledApps;
     protected ServiceTCP tcpserv;
+    protected ServiceUDP udpserv;
     protected String ownip;
     protected String id; //Une des particularités de java : un long fait toujours 8 bytes.
     protected int portUDP; // < 9999
@@ -53,6 +55,12 @@ public class Entity {
 
     public boolean getConnected(){
         return connected;
+    }
+    public Application getApp(int index){
+        return enabledApps.get(index).app;
+    }
+    public int isAppEnabled(String appId){
+        return enabledApps.indexOf(appId);
     }
     public class ServiceTCP implements Runnable{
 
@@ -124,6 +132,7 @@ public class Entity {
         t.start();
     }
 
+    public void setNext(String ip,int portUDP)
 
     public void parseWelc(String msg) throws ConnectionException {
         String[] ts = msg.split(" ");
@@ -292,29 +301,47 @@ public class Entity {
             e.printStackTrace();
         } 
     }
-
+    public static String getIDM(String msg){
+        return msg.substring(5,13);
+    }
+    public static String getIpMsg(String msg,int offset){
+        return msg.substring(offset,offset+15);
+    }
+    public static String getType(String msg){
+        return msg.substring(0,4);
+    }
+    public static int getPortMsg(String msg, int offset){
+        return Integer.parseInt(msg.substring(offset,offset+4));
+    }
     public void handle(String str){
-        if(listIDS.contains(str.substring(5,13))){//gérer messages envoyés.
-            if(str.substring(0,4).equals("EYBG")){
+        if(listIDS.contains(getIDM(str))){//gérer messages envoyés.
+            if(getType(str).equals("EYBG")){
                 disconnect();
             }
-            else if(str.substring(0,4).equals("TEST")){
+            else if(getType(str).equals("TEST")){
                 //Arrêter la procédure de test.
             }
-            listIDS.remove(str.substring(5,13));
+            listIDS.remove(getIDM(str));
         }
-        else {
-            switch (str.substring(0, 4)) {//TO DO
+        else{
+            switch (getType(str)) {//TO DO
                 case "APPL":
                     handleAPPL(str);
                     break;
                 case "WHOS":
                     sendUDP(str);
-                    sendUDP("MEMB " + generateIDMs());
+                    String idmess = generateIDMs();
+                    sendUDP("MEMB " + idmess+" "+id+" "+ipToNW(ownip)+" "+portToNW(portUDP)+" "
+                            +ipToNW(next.getHostName())+" "+portToNW(next.getPort()));
+                    listIDS.add(idmess);
                     break;
                 case "GBYE":
+                    if(getIpMsg(str,14).equals(ipToNW(next.getHostName()))){
+                        setNext(getIpMsg(str,35),getPortMsg(str,36));
+                        sendUDP("EYBG "+generateIDMs());
+                    }
                     break;
-                case "EYBG":
+                case "EYBG":disconnect();
                     break;
                 case "TEST":
                     break;

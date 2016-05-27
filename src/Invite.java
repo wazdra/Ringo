@@ -70,7 +70,10 @@ public class Invite{
             else {
                 switch(cmd){
                     case "test": String tt = sc.nextLine();
-                        System.out.println(tt.substring(5,13));
+                        System.out.println(Entity.getType(tt));
+                        System.out.println(Entity.getIDM(tt));
+                        System.out.println(Entity.getIpMsg(tt,14));
+                        System.out.println(Entity.getIpMsg(tt,35));
                         break;
                     case "help" : System.out.println("Commandes disponibles : \n"+
                             "- connect [ip]\n"+
