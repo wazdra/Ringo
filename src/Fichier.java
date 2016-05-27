@@ -1,6 +1,6 @@
 import java.util.*;
 import java.io.File.*;
-/*
+import java.io.*;
 
 public class Fichier extends Application{
     public final int maxSize = 466;
@@ -31,7 +31,7 @@ public class Fichier extends Application{
     } 
 
     public String getSenRequest(String numTrans, String content){
-        return entity.getAppRequest(this.id, "SEN " + generateIDM() + " " + numTrans + " " + content.length() + " " + content);
+        return entity.getAppRequest(this.id, "SEN " + Entity.generateIDM() + " " + numTrans + " " + content.length() + " " + content);
     }
 
     public void handleApp(String msg){
@@ -39,12 +39,21 @@ public class Fichier extends Application{
             String nomFichier = getNomFichier(msg);
             File f = new File(nomFichier);
             if(f.exists() && !f.isDirectory()) { 
-                int nbMsg = (file.length() / maxSize) + 1;
-                String numTrans = generateIDM();
+                int nbMsg = ((int)f.length() / maxSize) + 1;
+                String numTrans = Entity.generateIDM();
                 entity.sendUDP(getRokRequest(numTrans, nomFichier, nbMsg));
-                String allFileContent = FileUtils.readFileToString(f);
-                for (int i = 0; i < nbMsg; i++){
-                    entity.sendUDP(getSenRequest(numTrans, allFileContent.substring(i*maxSize,maxSize + (i*maxSize) + 1)));
+
+                try{
+                    FileInputStream fis = new FileInputStream(f);
+                    byte[] data = new byte[(int) f.length()];
+                    fis.read(data);
+                    fis.close();
+                    String allFileContent = new String(data, "UTF-8");
+                    for (int i = 0; i < nbMsg; i++){
+                        entity.sendUDP(getSenRequest(numTrans, allFileContent.substring(i*maxSize,maxSize + (i*maxSize) + 1)));
+                    }
+                } catch (Exception e){
+                    System.out.println("Impossible de charger le fichier !");
                 }
             }
             else{
@@ -61,4 +70,3 @@ public class Fichier extends Application{
         
     }
 }
-*/
