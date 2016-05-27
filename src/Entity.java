@@ -88,15 +88,17 @@ public class Entity {
         return enabledApps.indexOf(lia);
     }
 
-
+    public void broken(){
+        System.out.println("L'anneau est rompu, vous allez être déconnecté.\n Au revoir !");
+        System.exit(0);
+    }
     
 
-    public Entity(String ip,int portTCP, int portUDP){
+    public Entity(String ip,int portTCP, int portUDP, String ipmult, int portMult){
         disconnecting = false;
         disconnectingbis = false;
         listIDSdupl = new ArrayList<>();
         testing = false;
-        idmWhois = null;
         multidifdupl = null;
         this.id = generateIDM();
         this.enabledApps = new ArrayList<>();
@@ -114,7 +116,7 @@ public class Entity {
             e.printStackTrace();
             System.exit(-1);
         }
-        this.multidif = null;
+        this.multidif = new InetSocketAddress(ipmult,portMult);
         duplicated = false;
         this.ownip = ip;
         connected = false;

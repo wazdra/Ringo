@@ -47,13 +47,13 @@ public class Invite{
     public static void main(String args[]){
         msg = "";
         try{
-            entite = new Entity(getIPv4InetAddress().getHostAddress(),Integer.parseInt(args[0]),Integer.parseInt(args[1]));
+            entite = new Entity(getIPv4InetAddress().getHostAddress(),Integer.parseInt(args[0]),Integer.parseInt(args[1]), args[2], Integer.parseInt(args[3]));
 	    }
 	    catch(Exception exc){
             if(exc instanceof UnknownHostException){
                 System.out.println("Impossible de trouver l'adresse de la machine.");
             }
-	        System.out.println("Veuillez rentrer en arguments, dans l'ordre, le port TCP et le port UDP de votre choix.");
+	        System.out.println("Veuillez rentrer en arguments, dans l'ordre, le port TCP et le port UDP de votre choix, ainsi que l'adresse IP et le port de multidiffusion");
             exc.printStackTrace();
 	        System.exit(-1);
 	    }
