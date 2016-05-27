@@ -377,8 +377,11 @@ public class Entity {
         }
         else if(listIDSdupl.contains(getIDM(str))){
             listIDS.add(getIDM(str));
-
             switch (getType(str)) {
+                case "MEMB":
+                    sendUDP(str);
+                    Invite.addMsg(str.substring(14,22)+" est un membre de l'anneau. \n"
+                            +"Il a l'addresse "+getIpMsg(str,23)+":"+getPortMsg(str,39)+"\n");
                 case "APPL":
                     Application.handle(str,this);
                     break;
