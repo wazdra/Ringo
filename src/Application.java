@@ -3,7 +3,7 @@ public abstract class Application {
     protected Entity entity;
 
     public static String getIdApp(String msg){
-       return msg.substring(12,20);
+       return msg.substring(14,22);
     }
 
 
