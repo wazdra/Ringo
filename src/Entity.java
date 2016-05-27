@@ -94,7 +94,7 @@ public class Entity {
         this.udpserv = new ServiceUDP(portUDP,next,this);
         this.dupl = null;
         try {
-            setNext(InetAddress.getLocalHost().getHostAddress(), portUDP);
+            setNext(Invite.getIPv4InetAddress().getHostAddress(), portUDP);
         }
         catch(Exception e){
             System.out.println("Issue fatal de réseau : pas d'adresse IP propre !");
@@ -149,7 +149,7 @@ public class Entity {
             }
             else{
                 parseWelc(msg);
-                pw.println("NEWC " + ipToNW(InetAddress.getLocalHost().getHostAddress()) + " " + portToNW(portUDP));
+                pw.println("NEWC " + ipToNW(Invite.getIPv4InetAddress().getHostAddress()) + " " + portToNW(portUDP));
                 pw.flush();
                 msg = br.readLine();
                 if (!msg.equals("ACKC")) {
@@ -186,7 +186,7 @@ public class Entity {
             }
             else{
                 parseWelc(msg);
-                pw.println("DUPL " + ipToNW(InetAddress.getLocalHost().getHostAddress()) + " " + portToNW(portUDP) + " ");
+                pw.println("DUPL " + ipToNW(Invite.getIPv4InetAddress().getHostAddress()) + " " + portToNW(portUDP) + " ");
                 pw.flush();
                 msg = br.readLine();
                 if (!msg.equals("ACKC")) {

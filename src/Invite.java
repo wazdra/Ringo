@@ -4,12 +4,12 @@ import java.util.*;
 import java.lang.*;
 
 public class Invite{
-    static private InetAddress getIPv4InetAddress() throws SocketException, UnknownHostException {
+    static public InetAddress getIPv4InetAddress() throws SocketException, UnknownHostException {
 
         String os = System.getProperty("os.name").toLowerCase();
 
         if(os.indexOf("nix") >= 0 || os.indexOf("nux") >= 0) {
-            NetworkInterface ni = NetworkInterface.getByName("wlan0");
+            NetworkInterface ni = NetworkInterface.getByName("lan0");
 
             Enumeration<InetAddress> ias = ni.getInetAddresses();
 
