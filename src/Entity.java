@@ -302,6 +302,7 @@ public class Entity {
     }
 
     public synchronized void handle(String str){
+
         if(listIDS.contains(getIDM(str))){//gérer messages envoyés.
             Invite.addMsg("Retour à l'expéditeur de "+getIDM(str));
             if(getType(str).equals("EYBG")){
@@ -313,6 +314,7 @@ public class Entity {
             listIDS.remove(getIDM(str));
         }
         else{
+            System.out.println("ca foire");
             switch (getType(str)) {//TO DO
                 case "APPL":
                     System.out.println(str+" dans le case APPL");
