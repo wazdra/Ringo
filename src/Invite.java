@@ -96,7 +96,7 @@ public class Invite{
             else {
                 switch(cmd){
                     case "IP" :String ip = sc.nextLine();
-                        entite.setNext(ip,4242);
+                        entite.setNext(ip,4243);
                         break;
                     case "info":
                         System.out.println("Connecté à "+entite.next.getHostName()+":"+entite.next.getPort());
