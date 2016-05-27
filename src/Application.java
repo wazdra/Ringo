@@ -10,7 +10,6 @@ public abstract class Application {
 
     public static void handle(String msg, Entity e){
         System.out.println(getIdApp(msg));
-        System.out.println()
         int index = e.getIndexApp("DIFF####");
         System.out.println(index);
         if (index != -1){
