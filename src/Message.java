@@ -9,7 +9,7 @@ public class Message extends Application{
         this.id = "DIFF####";
     }
     public static int getSizeMess(String msg){
-        return Integer.parseInt(msg.substring(0,3));
+        return Integer.parseInt(msg.substring(23,26));
     }
 
     public static String lengthToNW(int length){
@@ -20,12 +20,12 @@ public class Message extends Application{
         return str;
     }
 
-    public static String getMess(String msg, int size){
-        return msg.substring(4,5+size);
+    public static String getMess(String msg){
+        return msg.substring(27);
     }
 
     public void handleApp(String msg){
-        Invite.addMsg("Message reçu : "+getMess(msg,getSizeMess(msg))); // Ajout du message à transférer dans l'invite de commande
+        Invite.addMsg("Message reçu : "+getMess(msg)); // Ajout du message à transférer dans l'invite de commande
         entity.sendUDP(msg);
     }
 
