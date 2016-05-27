@@ -20,5 +20,6 @@ public abstract class Application {
     }
 
     public abstract void handleApp(String msg);
-    public abstract void useApp();
+    public abstract void useApp(); // Mode interactif
+    public abstract void useApp(String msg); // mode non interactif
 }
