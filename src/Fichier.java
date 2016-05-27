@@ -1,6 +1,6 @@
 import java.util.*;
 import java.io.File.*;
-
+/*
 
 public class Fichier extends Application{
     public final int maxSize = 466;
@@ -61,3 +61,4 @@ public class Fichier extends Application{
         
     }
 }
+*/

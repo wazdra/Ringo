@@ -250,6 +250,7 @@ public class Entity {
                 setNext(Invite.getIPv4InetAddress().getHostAddress(),4343);
                 connected = false;
                 duplicated = false;
+                Invite.addMsg("Vous êtes déconnecté");
             }
             else if(duplicated && disconnecting){
                 disconnectingbis = true;
@@ -340,6 +341,7 @@ public class Entity {
     }
 
     public synchronized void handle(String str){
+        System.out.println("Message reçu : "+str);
         if(listIDS.contains(getIDM(str))){//gérer messages envoyés.
 
             Invite.addMsg("Retour à l'expéditeur de "+getIDM(str));
@@ -383,7 +385,7 @@ public class Entity {
             }
         }
         else{
-            listIDS.add(getIDM(str));
+            System.out.println("Message reconnu comme nouveau : "+str);
             if(duplicated){
                 listIDSdupl.add(getIDM(str));
             }
@@ -400,9 +402,12 @@ public class Entity {
                     listIDS.add(idmess);
                     break;
                 case "GBYE":
-                    if(getIpMsg(str,14).equals(ipToNW(next.getHostName()))){
-                        setNext(getIpMsg(str,35),getPortMsg(str,36));
+                    System.out.println("Message de GBYE : "+str);
+                    System.out.println("Parsing de l'IP : "+getIpMsg(str,14));
+                    System.out.println("IP de next retenue : "+ipToNW(next.getAddress().getHostAddress()));
+                    if(getIpMsg(str,14).equals(ipToNW(next.getAddress().getHostAddress()))){
                         sendUDP("EYBG "+generateIDM());
+                        setNext(getIpMsg(str,35),getPortMsg(str,36));
                     }
                     break;
                 case "EYBG":disconnect();
