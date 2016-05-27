@@ -1,3 +1,4 @@
+import javax.management.BadStringOperationException;
 import java.util.*;
 import java.io.*;
 import java.nio.channels.*;
@@ -7,7 +8,38 @@ import java.lang.*;
 
 
 public class Entity {
-    protected static final int messageMaxLength = 512;
+    public static byte[] longToBytes(long x) {
+        ByteBuffer buffer = ByteBuffer.allocate(Long.BYTES);
+        buffer.putLong(x);
+        return buffer.array();
+    }
+
+    public static String ipToNW(String ip) {//Pour coder les IP sur 15 octets
+        String[] parseur = ip.split("\\.");
+        while(parseur[0].length()!=3){
+            parseur[0] = "0"+parseur[0];
+        }
+        while(parseur[1].length()!=3){
+            parseur[1] = "0"+parseur[1];
+        }
+        while(parseur[2].length()!=3){
+            parseur[2] = "0"+parseur[2];
+        }
+        while(parseur[3].length()!=3){
+            parseur[3] = "0"+parseur[3];
+        }
+        return parseur[0]+"."+parseur[1]+"."+parseur[2]+"."+parseur[3];
+    }
+
+    public static String portToNW(int p){
+        String s = ""+p;
+        while(s.length()<4){
+            s = "0"+s;
+        }
+        return s;
+    }
+    public static final int messageMaxLength = 512;
+    protected ArrayList<String> listIDS; //C'est la liste des messages en attente de récupération.
     protected ServiceTCP tcpserv;
     protected String ownip;
     protected long id; //Une des particularités de java : un long fait toujours 8 bytes.
@@ -22,17 +54,15 @@ public class Entity {
     public boolean getConnected(){
         return connected;
     }
-
     public class ServiceTCP implements Runnable{
 
         public int portTCP;
         public InetSocketAddress next;
         protected InetSocketAddress multidif; // Le port UDP de multi dif < 9999
         public boolean duplicated;
-
         public ServiceTCP(int portTCP,int portUDP){
             try{
-                multidif = new InetSocketAddress("0.0.0.0",12345);
+                multidif = new InetSocketAddress("255.255.255.255",12345);
             }
             catch(Exception e){
                 e.printStackTrace();
@@ -53,8 +83,8 @@ public class Entity {
                     Socket s = ss.accept();
                     PrintWriter pw = new PrintWriter(new OutputStreamWriter(s.getOutputStream()));
                     BufferedReader br = new BufferedReader(new InputStreamReader(s.getInputStream()));
-                    System.out.println("WELC "+next.getAddress().getHostAddress()+" "+ next.getPort()+" "+multidif.getAddress().getHostAddress()+" "+multidif.getPort());
-                    pw.println("WELC "+next.getAddress().getHostAddress()+" "+ next.getPort()+" "+multidif.getAddress().getHostAddress()+" "+multidif.getPort());
+                    System.out.println("WELC "+ipToNW(next.getAddress().getHostAddress())+" "+ portToNW(next.getPort())+" "+ipToNW(multidif.getAddress().getHostAddress())+" "+portToNW(multidif.getPort()));
+                    pw.println("WELC "+ipToNW(next.getAddress().getHostAddress())+" "+ portToNW(next.getPort())+" "+ipToNW(multidif.getAddress().getHostAddress())+" "+portToNW(multidif.getPort()));
                     pw.flush();
                     String msg = br.readLine();
                     System.out.println(msg);
@@ -74,7 +104,7 @@ public class Entity {
                 }
             }
             catch(Exception e){
-                
+                e.printStackTrace();
             }
         }
     }
@@ -122,7 +152,7 @@ public class Entity {
             PrintWriter pw = new PrintWriter(new OutputStreamWriter(connection.getOutputStream()));
             String msg = br.readLine();
             parseWelc(msg);
-            pw.println("NEWC " + InetAddress.getLocalHost().getHostAddress() + " " + portUDP);
+            pw.println("NEWC " + ipToNW(InetAddress.getLocalHost().getHostAddress()) + " " + portToNW(portUDP));
             pw.flush();
             msg = br.readLine();
             if (!msg.equals("ACKC")) {
@@ -145,7 +175,7 @@ public class Entity {
 
     public void sendDcRequest(){
         if(connected){
-            sendUDP("GBYE "+id+" "+ownip+" "+portUDP+" "+next.getHostName()+" "+next.getPort());
+            sendUDP("GBYE "+(new String(longToBytes(id),0,8))+" "+ipToNW(ownip)+" "+portToNW(portUDP)+" "+ipToNW(next.getHostName())+" "+portToNW(next.getPort()));
         }
     }
     public void disconnect(){//À appeler lorsqu'on attend une réponse à une requête de déco.
@@ -159,7 +189,7 @@ public class Entity {
             e.printStackTrace();
         }
     }
-    public long generateIDM(){//génération de l'identifiant pseudo-unique
+    public long generateIDM(){//génération de l'identifiant pseudo-unique. Il servira aussi bien aux machines qu'aux messages
 	/* On utilisera 5 bytes de temps, donné par java, à la milliseconde près.
 	   Ainsi, deux utilisateurs doivent se connecter précisément à la même milliseconde
 	   pour avoir le même identifiant. De plus, les 3 autres bits seront générés aléatoirement.
@@ -167,24 +197,24 @@ public class Entity {
 	   1/(256^3) d'avoir le même identifiant.
 	 */
         long t = System.currentTimeMillis();
-	byte[] randomness = new byte[3];
-	Random rg = new Random();
-	rg.nextBytes(randomness);
-	long mod = 256;
-	mod = mod*mod;
-	mod = mod*mod;
-	mod = mod*256;
-	t = t%mod;
-	t = t+(Byte.toUnsignedInt(randomness[0])*mod);
-	mod *= 256;
-	t = t+(Byte.toUnsignedInt(randomness[1])*mod);
-	mod *=256;
-	t = t+(Byte.toUnsignedInt(randomness[2])*mod);
-	System.out.println(t);//Mesure de test, à retirer à terme !
-	return t;
+	    byte[] randomness = new byte[3];
+	    Random rg = new Random();
+	    rg.nextBytes(randomness);
+	    long mod = 256;
+	    mod = mod*mod;
+        mod = mod*mod;
+	    mod = mod*256;
+	    t = t%mod;
+	    t = t+(Byte.toUnsignedInt(randomness[0])*mod);
+	    mod *= 256;
+	    t = t+(Byte.toUnsignedInt(randomness[1])*mod);
+	    mod *=256;
+	    t = t+(Byte.toUnsignedInt(randomness[2])*mod);
+	    System.out.println(new String(longToBytes(t),0,8));//Mesure de test, à retirer à terme !
+	    return t;
     }
 
-    public void receiveUDP(Selector selector, DatagramChannel chanel){
+    public void receiveUDP(Selector selector, DatagramChannel chanel){//à supprimer à mon avis, il faut mettre en place ServiceUDP à la place.
         try{
             ByteBuffer buff = ByteBuffer.allocate(messageMaxLength);
             selector.select();
@@ -211,7 +241,7 @@ public class Entity {
                 }
             }
         } catch (Exception e){
-
+            e.printStackTrace();
         }      
     }
     public void sendUDP(String request){
@@ -253,8 +283,27 @@ public class Entity {
             }  
         }
         catch (Exception e){
-
+            e.printStackTrace();
         } 
+    }
+
+    public void handle(String str){
+        switch(str.substring(0,4)){//TO DO
+            case "APPL":handleAPPL(str);
+                break;
+            case "WHOS":
+                break;
+            case "GBYE":
+                break;
+            case "EYBG":disconnect();
+                break;
+            case "TEST":
+                break;
+            default:
+        }
+    }
+    public void handleAPPL(String str){
+
     }
 }
 

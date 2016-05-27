@@ -42,7 +42,7 @@ public class Invite{
 	    Boolean running = true;
 	    System.out.println("Bienvenue. Pour une aide à l'utilisation, taper help");
 	    Scanner sc = new Scanner(System.in);
-	    while(running){
+	    do{
             clearMsg();
             cmd = sc.nextLine();
 	        if(cmd.startsWith("connect")){
@@ -70,7 +70,7 @@ public class Invite{
             else {
                 switch(cmd){
                     case "test": String tt = sc.nextLine();
-                        System.out.println(properIp(tt));
+                        System.out.println(Entity.ipToNW(tt));
                         break;
                     case "help" : System.out.println("Commandes disponibles : \n"+
                             "- connect [ip]\n"+
@@ -79,7 +79,7 @@ public class Invite{
                             "Pour en apprendre plus sur l'utilisation d'une commande en particuler, help peut être suivie du nom de la commande en question.");//à compléter !
                         break;
                     case "quit" : System.out.println("Au revoir !");
-                        running = false;
+                        System.exit(0);
                         break;
                     case "1337" : System.out.println("Have an Easter Egg !");
                         break;
@@ -89,6 +89,6 @@ public class Invite{
 					     "Pour plus d'informations, rentrez la commande help.");
                 }
             }
-        }
+        }while(true);
     }
 }
