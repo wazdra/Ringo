@@ -300,7 +300,8 @@ public class Entity {
     public static int getPortMsg(String msg, int offset){
         return Integer.parseInt(msg.substring(offset,offset+4));
     }
-    public void handle(String str){
+
+    public synchronized void handle(String str){
         if(listIDS.contains(getIDM(str))){//gérer messages envoyés.
             Invite.addMsg("Retour à l'expéditeur de "+getIDM(str));
             if(getType(str).equals("EYBG")){
