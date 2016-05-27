@@ -25,7 +25,6 @@ public class Message extends Application{
     }
 
     public void handleApp(String msg){
-        System.out.println("msg");
         Invite.addMsg("Message reçu : "+getMess(msg)); // Ajout du message à transférer dans l'invite de commande
         entity.sendUDP(msg);
     }
