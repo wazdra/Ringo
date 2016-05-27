@@ -4,15 +4,24 @@ public abstract class Application {
     protected Entity entity;
 
     public static String getIdApp(String msg){
-        return "";
+        return msg.substring(14,22);
     }
+
+    public static String getMsgApp(String msg){
+        return msg.substring(14,22);
+    }
+
 
     public static void handle(String msg, Entity e){
-        String idApp = getIdApp(msg);
-        int index = e.getIndexApp(idApp);
+        int index = e.getIndexApp(getIdApp(msg));
         if (index != -1){
             Application app = e.getApp(index);
-
+            app.handleApp(msg);
+        }
+        else{
+            sendUDP(msg);
         }
     }
+
+    public abstract void handleApp(String msg);
 }
