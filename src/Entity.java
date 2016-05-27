@@ -13,6 +13,7 @@ public class Entity {
     public static byte[] longToBytes(long x) {
         ByteBuffer buffer = ByteBuffer.allocate(8);//On pourra utiliser Long.BYTES plutôt que 8 en java1.8 .
         buffer.putLong(x);
+        buffer.flip();
         return buffer.array();
     }
 
@@ -89,6 +90,7 @@ public class Entity {
     public Entity(String ip,int portTCP, int portUDP){
         disconnecting = false;
         this.id = generateIDM();
+        System.out.println(id);
         this.enabledApps = new ArrayList<>();
         this.listIDS = new ArrayList<>();
         enabledApps.add(new ListItemApp("DIFF####","message",new Message(this)));
@@ -241,13 +243,13 @@ public class Entity {
         byte[] b = longToBytes(t);
         char[] stringtobe = new char[8];
         for(int i = 0;i<5;i++){
-            stringtobe[i]=toTd[((int) b[i])%32];
+            stringtobe[i]=toTd[(Math.abs((int) b[7-i]))%32];
         }
         Random rg = new Random();
         byte[] bb = new byte[3];
         rg.nextBytes(bb);
         for(int i = 0;i<3;i++){
-            stringtobe[i+5]=toTd[(int) b[i]%32];
+            stringtobe[i+5]=toTd[(int) Math.abs(bb[i])%32];
         }
 	    return new String(stringtobe);
     }

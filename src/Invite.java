@@ -54,6 +54,7 @@ public class Invite{
                 System.out.println("Impossible de trouver l'adresse de la machine.");
             }
 	        System.out.println("Veuillez rentrer en arguments, dans l'ordre, le port TCP et le port UDP de votre choix.");
+            exc.printStackTrace();
 	        System.exit(-1);
 	    }
 	    String cmd;
