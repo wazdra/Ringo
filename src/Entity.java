@@ -105,25 +105,32 @@ public class Entity {
         public void run(){
             try{
                 ServerSocket ss = new ServerSocket(portTCP);
-                while(!duplicated) {
+                while(true) {
                     Socket s = ss.accept();
                     PrintWriter pw = new PrintWriter(new OutputStreamWriter(s.getOutputStream()));
                     BufferedReader br = new BufferedReader(new InputStreamReader(s.getInputStream()));
-                    pw.println("WELC "+ipToNW(next.getAddress().getHostAddress())+" "+ portToNW(next.getPort())+" "+
+
+                    if (duplicated){
+                        pw.println("NOTC");
+                        pw.flush();
+                    }
+                    else{
+                        pw.println("WELC "+ipToNW(next.getAddress().getHostAddress())+" "+ portToNW(next.getPort())+" "+
                             ipToNW(multidif.getAddress().getHostAddress())+" "+portToNW(multidif.getPort()));
-                    pw.flush();
-                    String msg = br.readLine();
-                    String[] ts = msg.split(" ");
-                    if(ts.length!=3){
-                        throw new ConnectionException("Mauvais comportement côté serveur, mauvais nombre d'arguments");
+                        pw.flush();
+                        String msg = br.readLine();
+                        String[] ts = msg.split(" ");
+                        if(ts.length!=3){
+                            throw new ConnectionException("Mauvais comportement côté serveur, mauvais nombre d'arguments");
+                        }
+                        if(!ts[0].equals("NEWC")){
+                            throw new ConnectionException("Mauvais comportement côté serveur, attendait NEWC");
+                        }
+                        ent.setNext(ts[1],Integer.parseInt(ts[2]));
+                        pw.println("ACKC");
+                        setConnected(true);
+                        pw.flush();
                     }
-                    if(!ts[0].equals("NEWC")){
-                        throw new ConnectionException("Mauvais comportement côté serveur, attendait NEWC");
-                    }
-                    ent.setNext(ts[1],Integer.parseInt(ts[2]));
-                    pw.println("ACKC");
-                    setConnected(true);
-                    pw.flush();
                     pw.close();
                     br.close();
                     s.close();
@@ -198,16 +205,59 @@ public class Entity {
             BufferedReader br = new BufferedReader(new InputStreamReader(connection.getInputStream()));
             PrintWriter pw = new PrintWriter(new OutputStreamWriter(connection.getOutputStream()));
             String msg = br.readLine();
-            parseWelc(msg);
-            pw.println("NEWC " + ipToNW(InetAddress.getLocalHost().getHostAddress()) + " " + portToNW(portUDP));
-            pw.flush();
-            msg = br.readLine();
-            if (!msg.equals("ACKC")) {
-                throw new ConnectionException("Problème de connection TCP");
+            if (msg.substring(0,4).equals("NOTC")){
+                throw new ConnectionException("L'entité à laquelle vous tentez de vous connecter a été dupliquée.");
             }
             else{
-                this.connected = true;
+                parseWelc(msg);
+                pw.println("NEWC " + ipToNW(InetAddress.getLocalHost().getHostAddress()) + " " + portToNW(portUDP));
+                pw.flush();
+                msg = br.readLine();
+                if (!msg.equals("ACKC")) {
+                    throw new ConnectionException("Problème de connection TCP");
+                }
+                else{
+                    this.connected = true;
+                }
             }
+            pw.close();
+            br.close();
+            connection.close();
+        } catch (Exception e) {
+            if (e instanceof ConnectionException) {
+                throw (ConnectionException) e;
+            } else {
+                e.printStackTrace();
+                throw new ConnectionException("Mauvais comportement");
+            }
+        }
+    }
+
+    public void duplication(String masterIP, int portTCP) throws ConnectionException {
+        try {
+            if (connected) {
+                throw new ConnectionException("Déja connecté");
+            }
+            Socket connection = new Socket(masterIP, portTCP);
+            BufferedReader br = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+            PrintWriter pw = new PrintWriter(new OutputStreamWriter(connection.getOutputStream()));
+            String msg = br.readLine();
+            if (msg.substring(0,4).equals("NOTC")){
+                throw new ConnectionException("L'entité que vous tentez de dupliquer a déjà été dupliquée.");
+            }
+            else{
+                parseWelc(msg);
+                pw.println("DUPL " + ipToNW(InetAddress.getLocalHost().getHostAddress()) + " " + portToNW(portUDP) + " ");
+                pw.flush();
+                msg = br.readLine();
+                if (!msg.equals("ACKC")) {
+                    throw new ConnectionException("Problème de connection TCP");
+                }
+                else{
+                    this.connected = true;
+                }
+            }
+            pw.close();
             br.close();
             connection.close();
         } catch (Exception e) {
@@ -267,37 +317,6 @@ public class Entity {
 	    t = t+(((int)randomness[2])*mod);
 	    return t;
     }
-
-    public void receiveUDP(Selector selector, DatagramChannel chanel){//à supprimer à mon avis, il faut mettre en place ServiceUDP à la place.
-        try{
-            ByteBuffer buff = ByteBuffer.allocate(messageMaxLength);
-            selector.select();
-            Iterator<SelectionKey> it = selector.selectedKeys().iterator();
-            while(it.hasNext()) {
-                SelectionKey sk = it.next();
-                it.remove();
-                if (sk.isReadable() && sk.channel() == chanel) {
-                    chanel.receive(buff);
-                    String message = new String(buff.array(), 0, buff.array().length);
-                    buff.clear();
-                    String type = message.substring(0, 3);
-                    switch (type) {
-                        case "APPL":
-                            String[] st = message.split(" ", 4);
-                            String idm = st[1];
-                            int idApp = Integer.parseInt(st[2]);
-                            String mess = st[3];
-                            break;
-                    }
-
-                } else {
-                    System.out.println("wtf");
-                }
-            }
-        } catch (Exception e){
-            e.printStackTrace();
-        }      
-    }
     public void sendUDP(String request){
         try{
             DatagramSocket dso = new DatagramSocket();
@@ -328,21 +347,6 @@ public class Entity {
         return "APPL " + s + " " + idApp + " " + messageApp;
     }
 
-    public void receiveAll(){
-        try{
-            Selector selector = Selector.open();
-            DatagramChannel chanel = DatagramChannel.open();
-            chanel.configureBlocking(false);
-            chanel.bind(new InetSocketAddress(this.portUDP));
-            chanel.register(selector,SelectionKey.OP_READ);
-            while(true){
-                receiveUDP(selector,chanel);
-            }  
-        }
-        catch (Exception e){
-            e.printStackTrace();
-        } 
-    }
     public static String getIDM(String msg){
         return msg.substring(5,13);
     }

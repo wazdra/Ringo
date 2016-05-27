@@ -45,6 +45,8 @@ public class Invite{
 	    do{
             clearMsg();
             cmd = sc.nextLine();
+
+            // CONNEXION
 	        if(cmd.startsWith("connect")){
                 parseur = cmd.split(" ");
                 if(parseur.length ==3 &&
@@ -67,6 +69,30 @@ public class Invite{
                     System.out.println("Entrez, dans l'ordre, l'IP de l'entité à laquelle vous souhaitez vous connecter, et son port TCP.");
                 }
             }
+            // DUPLICATION
+            else if(cmd.startsWith("duplication")){
+                parseur = cmd.split(" ");
+                if(parseur.length ==3 &&
+                        (properIp(parseur[1]) || parseur[1].equalsIgnoreCase("localhost"))){
+                    try{
+                        entite.duplication(parseur[1],Integer.parseInt(parseur[2]));
+                        System.out.println("Connecté avec succès au ring de "+parseur[1]);
+                    }
+                    catch(Exception exc){
+                        if(exc instanceof ConnectionException){
+                            System.out.println("La connection a été refusée : "+exc.toString());
+                        }
+                        else if(exc instanceof NumberFormatException){
+                            System.out.println("Le deuxième argument doit être un port.");
+                        }
+                        else{exc.printStackTrace();}
+                    }
+                }
+                else{
+                    System.out.println("Entrez, dans l'ordre, l'IP de l'entité à laquelle vous souhaitez vous dupliquer, et son port TCP.");
+                }
+            }
+            // AUTRES COMMANDES
             else {
                 switch(cmd){
                     case "info":
@@ -77,7 +103,7 @@ public class Invite{
                         System.out.println(Application.getIdApp(tt));
                         break;
                     case "help" : System.out.println("Commandes disponibles : \n"+
-                            "- connect [ip]\n"+
+                            "- connect [ip] [port]\n"+
                             "- quit\n"+
                             "- help\n"+
                             "Pour en apprendre plus sur l'utilisation d'une commande en particuler, help peut être suivie du nom de la commande en question.");//à compléter !
