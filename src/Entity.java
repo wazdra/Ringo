@@ -98,6 +98,7 @@ public class Entity {
         }
         catch(Exception e){
             System.out.println("Issue fatal de réseau : pas d'adresse IP propre !");
+            e.printStackTrace();
             System.exit(-1);
         }
         this.multidif = null;
