@@ -238,8 +238,8 @@ public class Entity {
     public void sendDcRequest(){
         if(connected){
             disconnecting = true;
-            sendUDP("GBYE "+id+" "+ipToNW(ownip)+" "+portToNW(portUDP)+" "+ipToNW(next.getHostName())+" "+portToNW(next.getPort()));
-            sendUDPd("GBYE "+id+" "+ipToNW(ownip)+" "+portToNW(portUDP)+" "+ipToNW(next.getHostName())+" "+portToNW(next.getPort()));
+            sendUDP("GBYE "+id+" "+ipToNW(ownip)+" "+portToNW(portUDP)+" "+ipToNW(next.getAddress().getHostAddress())+" "+portToNW(next.getPort()));
+            sendUDPd("GBYE "+id+" "+ipToNW(ownip)+" "+portToNW(portUDP)+" "+ipToNW(next.getAddress().getHostAddress())+" "+portToNW(next.getPort()));
 
         }
     }
