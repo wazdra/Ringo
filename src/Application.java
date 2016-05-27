@@ -3,8 +3,7 @@ public abstract class Application {
     protected Entity entity;
 
     public static String getIdApp(String msg){
-        char[] mm = msg.toCharArray();
-        return (""+mm[13]+mm[14]+mm[15]+mm[16]+mm[17]+mm[18]+mm[19]+mm[20]);
+       return msg.substring(12,20);
     }
 
 
