@@ -56,6 +56,8 @@ public class ServiceTCP implements Runnable{
                         ent.setDupl(ts[1], Integer.parseInt(ts[2]));
                         ent.setMultiDupl(ts[3],Integer.parseInt(ts[3]));
                         pw.println("ACKD "+Entity.portToNW(portUDP));
+                        Invite.addMsg("Duplication effectuée avec "+ts[1]+".\n" +
+                                "Aucune autre connexion ne peut être acceptée.");
                     }
                     else {
                         throw new ConnectionException("Mauvais comportement côté serveur, attendait NEWC");

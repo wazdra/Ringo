@@ -47,7 +47,10 @@ public class Entity {
     protected ArrayList<ListItemApp> enabledApps;
     protected ArrayList<String> listIDSdupl;
     protected ServiceTCP tcpserv;
+    protected boolean testing;
+    protected boolean disconnectingbis;
     protected ServiceUDP udpserv;
+    String idmWhois;
     protected String ownip;
     protected boolean disconnecting;
     protected String id; //Une des particularités de java : un long fait toujours 8 bytes.
@@ -90,6 +93,10 @@ public class Entity {
 
     public Entity(String ip,int portTCP, int portUDP){
         disconnecting = false;
+        disconnectingbis = false;
+        listIDSdupl = new ArrayList<>();
+        testing = false;
+        idmWhois = null;
         multidifdupl = null;
         this.id = generateIDM();
         this.enabledApps = new ArrayList<>();
@@ -232,14 +239,20 @@ public class Entity {
         if(connected){
             disconnecting = true;
             sendUDP("GBYE "+id+" "+ipToNW(ownip)+" "+portToNW(portUDP)+" "+ipToNW(next.getHostName())+" "+portToNW(next.getPort()));
+            sendUDPd("GBYE "+id+" "+ipToNW(ownip)+" "+portToNW(portUDP)+" "+ipToNW(next.getHostName())+" "+portToNW(next.getPort()));
+
         }
     }
 
-    public void disconnect(){//À appeler lorsqu'on attend une réponse à une requête de déco.
+    public void disconnect(){//À appeler lorsqu'on reçoit EYBG une réponse à une requête de déco.
         try {
-            if (disconnecting) {
+            if((!duplicated && disconnecting)||(duplicated && disconnecting && disconnectingbis)){
                 setNext(Invite.getIPv4InetAddress().getHostAddress(),4343);
                 connected = false;
+                duplicated = false;
+            }
+            else if(duplicated && disconnecting){
+                disconnectingbis = true;
             }
         }
         catch(Exception e){
@@ -248,6 +261,9 @@ public class Entity {
         }
     }
 
+    public void sendWhoisRequest(){
+
+    }
 
     public static String generateIDM(){/*Devant l'incompatibilité des strings avec certains caractères spéciaux, on
     utilisera uniquement des caractères parmis 32. Les 5 premiers sont déterminés par le temps actuel, les 3 derniers par un Random.
@@ -265,6 +281,20 @@ public class Entity {
             stringtobe[i+5]=toTd[(int) Math.abs(bb[i])%32];
         }
 	    return new String(stringtobe);
+    }
+    public void sendUDPd(String request){
+        try{
+            if(duplicated) {
+                DatagramSocket dso = new DatagramSocket();
+                byte[] data;
+                data = request.getBytes();
+                DatagramPacket paquet = new DatagramPacket(data, data.length, dupl);
+                dso.send(paquet);
+                listIDSdupl.add(getIDM(request));
+            }
+        } catch(Exception e){
+            e.printStackTrace();
+        }
     }
     public void sendUDP(String request){
         try{
@@ -311,22 +341,59 @@ public class Entity {
 
     public synchronized void handle(String str){
         if(listIDS.contains(getIDM(str))){//gérer messages envoyés.
+
             Invite.addMsg("Retour à l'expéditeur de "+getIDM(str));
             if(getType(str).equals("EYBG")){
                 disconnect();
             }
             else if(getType(str).equals("TEST")){
-                //Arrêter la procédure de test.
+                testing = false;
             }
             listIDS.remove(getIDM(str));
+            if(listIDSdupl.contains(getIDM(str))){
+                listIDSdupl.remove(getIDM(str));
+            }
         }
-        else{
-            switch (getType(str)) {//TO DO
+        else if(listIDSdupl.contains(getIDM(str))){
+            listIDS.add(getIDM(str));
+
+            switch (getType(str)) {
                 case "APPL":
                     Application.handle(str,this);
                     break;
                 case "WHOS":
                     sendUDP(str);
+                    String idmess = generateIDM();
+                    sendUDP("MEMB " + idmess+" "+id+" "+ipToNW(ownip)+" "+portToNW(portUDP)+" "
+                            +ipToNW(next.getHostName())+" "+portToNW(next.getPort()));
+                    listIDS.add(idmess);
+                    break;
+                case "GBYE":
+                    System.out.println(getIpMsg(str,14));
+                    if(getIpMsg(str,14).equals(ipToNW(next.getHostName()))){
+                        setNext(getIpMsg(str,35),getPortMsg(str,36));
+                        sendUDP("EYBG "+generateIDM());
+                    }
+                    break;
+                case "EYBG":disconnect();
+                    break;
+                case "TEST":
+                    break;
+                default:
+            }
+        }
+        else{
+            listIDS.add(getIDM(str));
+            if(duplicated){
+                listIDSdupl.add(getIDM(str));
+            }
+            switch (getType(str)) {
+                case "APPL":
+                    Application.handle(str,this);
+                    break;
+                case "WHOS":
+                    sendUDP(str);
+                    sendUDPd(str);
                     String idmess = generateIDM();
                     sendUDP("MEMB " + idmess+" "+id+" "+ipToNW(ownip)+" "+portToNW(portUDP)+" "
                             +ipToNW(next.getHostName())+" "+portToNW(next.getPort()));

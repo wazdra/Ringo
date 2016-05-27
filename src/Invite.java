@@ -133,9 +133,27 @@ public class Invite{
                             "- help\n"+
                             "Pour en apprendre plus sur l'utilisation d'une commande en particuler, help peut être suivie du nom de la commande en question.");//à compléter !
                         break;
-                    case "quit" : System.out.println("Au revoir !");
+                    case "quit" :
+                        if(entite.connected){
+                            entite.sendDcRequest();
+                            System.out.println("Veuillez attendre la déconnexion de l'anneau...");
+                            while(entite.connected){
+                                System.out.print(".");
+                                try{Thread.sleep(1000);}catch(Exception e){e.printStackTrace();}
+                            }
+                            System.out.println("Au revoir !");
+                            System.exit(0);
+                        }
+                        System.out.println("Au revoir !");
                         System.exit(0);
                         break;
+                    case "disconnect":
+                        entite.sendDcRequest();
+                        System.out.println("Vous serez notifiez lorsque la déconnexion sera effective.");
+                        break;
+                    case "whois":
+                        entite.sendWhoisRequest();
+                        System.out.println("Vous serez notifiez des réponses de la communauté de l'anneau");
                     case "1337" : System.out.println("Have an Easter Egg !");
                         break;
                     case "refresh" : if(testMsg()){System.out.println("Vous n'avez aucun message, patience !");}
