@@ -59,7 +59,7 @@ public class Entity {
     public Application getApp(int index){
         return enabledApps.get(index).app;
     }
-    public int isAppEnabled(String appId){
+    public int getIdApp(String appId){
         return enabledApps.indexOf(appId);
     }
     public class ServiceTCP implements Runnable{
@@ -132,7 +132,11 @@ public class Entity {
         t.start();
     }
 
-    public void setNext(String ip,int portUDP)
+    public synchronized void setNext(String ip,int portUDP){
+        next = new InetSocketAddress(ip,portUDP);
+        tcpserv.next = this.next;
+        udpserv.next = this.next;
+    }
 
     public void parseWelc(String msg) throws ConnectionException {
         String[] ts = msg.split(" ");
