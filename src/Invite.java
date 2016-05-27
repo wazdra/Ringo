@@ -87,8 +87,11 @@ public class Invite{
                         break;
                     case "refresh" : if(testMsg()){System.out.println("Vous n'avez aucun message, patience !");}
                         break;
-                    default : System.out.println(cmd+" n'est pas une commande correcte.\n"+
-					     "Pour plus d'informations, rentrez la commande help.");
+                    default : if(entite.cmdInteract(cmd)){}
+                        else {
+                        System.out.println(cmd + " n'est pas une commande correcte.\n" +
+                                "Pour plus d'informations, rentrez la commande help.");
+                    }
                 }
             }
         }while(true);

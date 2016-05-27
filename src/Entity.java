@@ -57,6 +57,22 @@ public class Entity {
     public boolean getConnected(){
         return connected;
     }
+    public boolean cmdInteract(String cmd){
+        for(ListItemApp o :enabledApps){
+            if(cmd.startsWith(o.useId)){
+                String str = cmd.substring(o.useId.length());//On enlève le nom de l'application de la string.
+                if(str.equals("")){
+                    o.app.useApp();
+                }
+                else{
+                    o.app.useApp(str.substring(1));//On enlève l'espace
+                }
+                return true;
+            }
+        }
+        return false;
+
+    }
     public Application getApp(int index){
         return enabledApps.get(index).app;
     }
@@ -124,6 +140,8 @@ public class Entity {
     public Entity(String ip,int portTCP, int portUDP){
         disconnecting = false;
         this.id = generateIDMs();
+        this.enabledApps = new ArrayList<>();
+        enabledApps.add(new ListItemApp("DIFF####","message",new Message(this)));
         this.portUDP = portUDP;
         this.tcpserv = new ServiceTCP(portTCP,portUDP);
         this.dupl = null;
