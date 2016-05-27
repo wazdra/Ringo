@@ -47,7 +47,7 @@ public class Invite{
     public static void main(String args[]){
         msg = "";
         try{
-            entite = new Entity(InetAddress.getLocalHost().getHostAddress(),Integer.parseInt(args[0]),Integer.parseInt(args[1]));
+            entite = new Entity(getIPv4InetAddress().getHostAddress(),Integer.parseInt(args[0]),Integer.parseInt(args[1]));
 	    }
 	    catch(Exception exc){
             if(exc instanceof UnknownHostException){
