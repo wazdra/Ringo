@@ -247,6 +247,9 @@ public class Entity {
 	    Random rg = new Random();
 	    rg.nextBytes(randomness);
 	    long mod = 256;
+        while(Math.abs(randomness[0])==127||Math.abs(randomness[1])==127||Math.abs(randomness[2])==127){
+         rg.nextBytes(randomness);
+        }
 	    mod = mod*mod;
         mod = mod*mod;
 	    mod = mod*256;
