@@ -302,7 +302,7 @@ public class Entity {
     }
 
     public synchronized void handle(String str){
-
+        System.out.println(getIDM(str));
         if(listIDS.contains(getIDM(str))){//gérer messages envoyés.
             Invite.addMsg("Retour à l'expéditeur de "+getIDM(str));
             if(getType(str).equals("EYBG")){
