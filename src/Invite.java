@@ -95,8 +95,12 @@ public class Invite{
             // AUTRES COMMANDES
             else {
                 switch(cmd){
+                    case "IP" :String ip = sc.nextLine();
+                        entite.setNext(ip,4242);
+                        break;
                     case "info":
                         System.out.println("Connecté à "+entite.next.getHostName()+":"+entite.next.getPort());
+                        break;
                     case "test": String tt = sc.nextLine();
                         System.out.println(Entity.getType(tt));
                         System.out.println(Entity.getIDM(tt));
