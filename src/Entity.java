@@ -8,6 +8,8 @@ import java.lang.*;
 
 
 public class Entity {
+    public static char[] toTd={'1','2','3','4','5','6','A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P',
+            'Q','R','S','T','U','V','W','X','Y','Z'};
     public static byte[] longToBytes(long x) {
         ByteBuffer buffer = ByteBuffer.allocate(8);//On pourra utiliser Long.BYTES plutôt que 8 en java1.8 .
         buffer.putLong(x);
@@ -86,7 +88,7 @@ public class Entity {
 
     public Entity(String ip,int portTCP, int portUDP){
         disconnecting = false;
-        this.id = generateIDMs();
+        this.id = generateIDM();
         this.enabledApps = new ArrayList<>();
         this.listIDS = new ArrayList<>();
         enabledApps.add(new ListItemApp("DIFF####","message",new Message(this)));
@@ -231,35 +233,23 @@ public class Entity {
         }
     }
 
-    public static String generateIDMs(){
-        String s = new String(longToBytes(generateIDM()),0,8);
-        return s;
-    }
-    public static long generateIDM(){//génération de l'identifiant pseudo-unique. Il servira aussi bien aux machines qu'aux messages
-	/* On utilisera 5 bytes de temps, donné par java, à la milliseconde près.
-	   Ainsi, deux utilisateurs doivent se connecter précisément à la même milliseconde
-	   pour avoir le même identifiant. De plus, les 3 autres bits seront générés aléatoirement.
-	   Ainsi, deux utilisateurs se connectant à la même milliseconde n'ont qu'une probabilité
-	   1/(256^3) d'avoir le même identifiant.
+
+    public static String generateIDM(){/*Devant l'incompatibilité des strings avec certains caractères spéciaux, on
+    utilisera uniquement des caractères parmis 32. Les 5 premiers sont déterminés par le temps actuel, les 3 derniers par un Random.
 	 */
         long t = System.currentTimeMillis();
-	    byte[] randomness = new byte[3];
-	    Random rg = new Random();
-	    rg.nextBytes(randomness);
-	    long mod = 256;
-        while(Math.abs(randomness[0])==127||Math.abs(randomness[1])==127||Math.abs(randomness[2])==127){
-         rg.nextBytes(randomness);
+        byte[] b = longToBytes(t);
+        char[] stringtobe = new char[8];
+        for(int i = 0;i<5;i++){
+            stringtobe[i]=toTd[((int) b[i])%32];
         }
-	    mod = mod*mod;
-        mod = mod*mod;
-	    mod = mod*256;
-	    t = t%mod;
-	    t = t+((Math.abs((int) randomness[0])+33)*mod);
-	    mod *= 256;
-	    t = t+((Math.abs((int) randomness[1])+33)*mod);
-	    mod *=256;
-	    t = t+((Math.abs((int) randomness[2])+33)*mod);
-	    return t;
+        Random rg = new Random();
+        byte[] bb = new byte[3];
+        rg.nextBytes(bb);
+        for(int i = 0;i<3;i++){
+            stringtobe[i+5]=toTd[(int) b[i]%32];
+        }
+	    return new String(stringtobe);
     }
     public void sendUDP(String request){
         try{
@@ -285,7 +275,7 @@ public class Entity {
     }
 
     public String getAppRequest(String idApp, String messageApp){
-        String s = generateIDMs();
+        String s = generateIDM();
         Invite.addMsg("Le message d'identifiant "+s+" a été envoyé");
         listIDS.add(s);
         return "APPL " + s + " " + idApp + " " + messageApp;
@@ -325,7 +315,7 @@ public class Entity {
                     break;
                 case "WHOS":
                     sendUDP(str);
-                    String idmess = generateIDMs();
+                    String idmess = generateIDM();
                     sendUDP("MEMB " + idmess+" "+id+" "+ipToNW(ownip)+" "+portToNW(portUDP)+" "
                             +ipToNW(next.getHostName())+" "+portToNW(next.getPort()));
                     listIDS.add(idmess);
@@ -333,7 +323,7 @@ public class Entity {
                 case "GBYE":
                     if(getIpMsg(str,14).equals(ipToNW(next.getHostName()))){
                         setNext(getIpMsg(str,35),getPortMsg(str,36));
-                        sendUDP("EYBG "+generateIDMs());
+                        sendUDP("EYBG "+generateIDM());
                     }
                     break;
                 case "EYBG":disconnect();
