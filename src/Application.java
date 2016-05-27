@@ -1,3 +1,5 @@
+import java.util.ListIterator;
+
 public abstract class Application {
     protected String id;
     protected Entity entity;
@@ -9,14 +11,15 @@ public abstract class Application {
 
 
     public static void handle(String msg, Entity e){
-        System.out.println(getIdApp(msg));
-        int index = e.getIndexApp("DIFF####");
-        System.out.println(index);
-        if (index != -1){
-            Application app = e.getApp(index);
-            app.handleApp(msg);
+        Boolean b = false;
+        for(ListItemApp lia : e.enabledApps){
+            if(lia.id.equals(getIdApp(msg))){
+                lia.app.handleApp(msg);
+                b = true;
+                break;
+            }
         }
-        else{
+        if(!b){
             e.sendUDP(msg);
         }
     }

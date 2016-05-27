@@ -80,8 +80,8 @@ public class Entity {
     public Application getApp(int index){
         return enabledApps.get(index).app;
     }
-    public int getIndexApp(String appId){
-        return enabledApps.indexOf(appId);
+    public int getIndexApp(ListItemApp lia){
+        return enabledApps.indexOf(lia);
     }
 
 
