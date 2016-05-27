@@ -107,13 +107,10 @@ public class Entity {
                     Socket s = ss.accept();
                     PrintWriter pw = new PrintWriter(new OutputStreamWriter(s.getOutputStream()));
                     BufferedReader br = new BufferedReader(new InputStreamReader(s.getInputStream()));
-                    System.out.println("WELC "+ipToNW(next.getAddress().getHostAddress())+" "+ portToNW(next.getPort())+
-                            " "+ipToNW(multidif.getAddress().getHostAddress())+" "+portToNW(multidif.getPort()));
                     pw.println("WELC "+ipToNW(next.getAddress().getHostAddress())+" "+ portToNW(next.getPort())+" "+
                             ipToNW(multidif.getAddress().getHostAddress())+" "+portToNW(multidif.getPort()));
                     pw.flush();
                     String msg = br.readLine();
-                    System.out.println(msg);
                     String[] ts = msg.split(" ");
                     if(ts.length!=3){
                         throw new ConnectionException("Mauvais comportement côté serveur, mauvais nombre d'arguments");
@@ -141,16 +138,20 @@ public class Entity {
         disconnecting = false;
         this.id = generateIDMs();
         this.enabledApps = new ArrayList<>();
+        this.listIDS = new ArrayList<>();
         enabledApps.add(new ListItemApp("DIFF####","message",new Message(this)));
         this.portUDP = portUDP;
         this.tcpserv = new ServiceTCP(portTCP,portUDP);
+        this.udpserv = new ServiceUDP(portUDP,next,this);
         this.dupl = null;
         this.multidif = null;
         duplicated = false;
         this.ownip = ip;
         connected = false;
         Thread t = new Thread(tcpserv);
+        Thread tt = new Thread(udpserv);
         t.start();
+        tt.start();
     }
 
     public synchronized void setNext(String ip,int portUDP){
@@ -253,7 +254,6 @@ public class Entity {
 	    t = t+(((int)randomness[1])*mod);
 	    mod *=256;
 	    t = t+(((int)randomness[2])*mod);
-	    System.out.println(new String(longToBytes(t),0,8));//Mesure de test, à retirer à terme !
 	    return t;
     }
 
@@ -310,8 +310,11 @@ public class Entity {
         }
     }
 
-    public static String getAppRequest(String idApp, String messageApp){
-        return "APPL " + generateIDM() + " " + idApp + " " + messageApp;
+    public String getAppRequest(String idApp, String messageApp){
+        String s = generateIDMs();
+        Invite.addMsg("Le message d'identifiant "+s+" a été envoyé");
+        listIDS.add(s);
+        return "APPL " + s + " " + idApp + " " + messageApp;
     }
 
     public void receiveAll(){
@@ -343,6 +346,7 @@ public class Entity {
     }
     public void handle(String str){
         if(listIDS.contains(getIDM(str))){//gérer messages envoyés.
+            Invite.addMsg("Retour à l'expéditeur de "+getIDM(str));
             if(getType(str).equals("EYBG")){
                 disconnect();
             }
