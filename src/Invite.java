@@ -122,10 +122,14 @@ public class Invite{
                     case "info":
                         System.out.println("Connecté à "+entite.next.getAddress().getHostAddress()+":"+entite.next.getPort());
                         break;
-                    case "test": String tt = sc.nextLine();
-                        System.out.println(Entity.getType(tt));
-                        System.out.println(Entity.getIDM(tt));
-                        System.out.println(Application.getIdApp(tt));
+                    case "test":
+                        Boolean b = entite.test();
+                        if(b){
+                            System.out.println("L'anneau fonctionne correctement");
+                        }
+                        else{
+                            System.out.println("L'anneau ne fonctionnait pas et a été dissous");
+                        }
                         break;
                     case "help" : System.out.println("Commandes disponibles : \n"+
                             "- connect [ip] [port]\n"+
@@ -154,6 +158,7 @@ public class Invite{
                     case "whois":
                         entite.sendWhoisRequest();
                         System.out.println("Vous serez notifiez des réponses de la communauté de l'anneau");
+                        break;
                     case "1337" : System.out.println("Have an Easter Egg !");
                         break;
                     case "refresh" : if(testMsg()){System.out.println("Vous n'avez aucun message, patience !");}

@@ -339,11 +339,29 @@ public class Entity {
     public static int getPortMsg(String msg, int offset){
         return Integer.parseInt(msg.substring(offset,offset+4));
     }
-
+    public boolean test(){
+        String s = generateIDM();
+        sendUDP("TEST "+s+" "+ipToNW(multidif.getAddress().getHostAddress())+" "+portToNW(multidif.getPort()));
+        testing = true;
+        long t = System.currentTimeMillis();
+        while(System.currentTimeMillis()-t<20000){
+            if(!testing){
+                return true;
+            }
+        }
+        if(testing){
+            sendUDP(multidif.getAddress().getHostAddress(),multidif.getPort(),"DOWN");
+            try {
+                this.setNext(Invite.getIPv4InetAddress().getHostAddress(), this.portUDP);
+            }
+            catch(Exception e){System.out.println("Shouldn't happen...");e.printStackTrace();}
+            connected = false;
+            return false;
+        }
+        else return true;
+    }
     public synchronized void handle(String str){
-        System.out.println("Message reçu : "+str);
         if(listIDS.contains(getIDM(str))){//gérer messages envoyés.
-
             Invite.addMsg("Retour à l'expéditeur de "+getIDM(str));
             if(getType(str).equals("EYBG")){
                 disconnect();
@@ -351,6 +369,7 @@ public class Entity {
             else if(getType(str).equals("TEST")){
                 testing = false;
             }
+            else if(getType(str).equals(""))
             listIDS.remove(getIDM(str));
             if(listIDSdupl.contains(getIDM(str))){
                 listIDSdupl.remove(getIDM(str));
@@ -379,13 +398,12 @@ public class Entity {
                     break;
                 case "EYBG":disconnect();
                     break;
-                case "TEST":
+                case "TEST": sendUDP(str);
                     break;
                 default:
             }
         }
         else{
-            System.out.println("Message reconnu comme nouveau : "+str);
             if(duplicated){
                 listIDSdupl.add(getIDM(str));
             }
@@ -395,19 +413,16 @@ public class Entity {
                     break;
                 case "WHOS":
                     sendUDP(str);
-                    sendUDPd(str);
                     String idmess = generateIDM();
                     sendUDP("MEMB " + idmess+" "+id+" "+ipToNW(ownip)+" "+portToNW(portUDP)+" "
                             +ipToNW(next.getHostName())+" "+portToNW(next.getPort()));
                     listIDS.add(idmess);
                     break;
                 case "GBYE":
-                    System.out.println("Message de GBYE : "+str);
-                    System.out.println("Parsing de l'IP : "+getIpMsg(str,14));
-                    System.out.println("IP de next retenue : "+ipToNW(next.getAddress().getHostAddress()));
                     if(getIpMsg(str,14).equals(ipToNW(next.getAddress().getHostAddress()))){
                         sendUDP("EYBG "+generateIDM());
-                        setNext(getIpMsg(str,35),getPortMsg(str,36));
+                        setNext(getIpMsg(str,35),getPortMsg(str,51));
+                        Invite.addMsg("Changement de successeur, le suivant a déconnecté");
                     }
                     break;
                 case "EYBG":disconnect();
