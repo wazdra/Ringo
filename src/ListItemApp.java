@@ -10,6 +10,9 @@ public class ListItemApp {
         this.id = i;
         this.app = a;
     }
+    public String toString(){
+        return id;
+    }
     public boolean equals(Object o){
         if(o instanceof ListItemApp){
             return o==this;
