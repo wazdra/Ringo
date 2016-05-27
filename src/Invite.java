@@ -95,9 +95,8 @@ public class Invite{
             // AUTRES COMMANDES
             else {
                 switch(cmd){
-                    case "IP" :String ip = sc.nextLine();
-                        entite.setNext(ip,4243);
-                        break;
+                    case "locinfo" :
+                        try{System.out.println("Mon IP : "+InetAddress.getLocalHost());}catch(Exception e){}
                     case "info":
                         System.out.println("Connecté à "+entite.next.getHostName()+":"+entite.next.getPort());
                         break;
