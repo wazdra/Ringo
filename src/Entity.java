@@ -147,6 +147,13 @@ public class Entity {
         this.tcpserv = new ServiceTCP(portTCP,portUDP,this);
         this.udpserv = new ServiceUDP(portUDP,next,this);
         this.dupl = null;
+        try {
+            setNext(InetAddress.getLocalHost().getHostAddress(), portUDP);
+        }
+        catch(Exception e){
+            System.out.println("Issue fatal de réseau : pas d'adresse IP propre !");
+            System.exit(-1);
+        }
         this.multidif = null;
         duplicated = false;
         this.ownip = ip;
@@ -223,8 +230,7 @@ public class Entity {
     public void disconnect(){//À appeler lorsqu'on attend une réponse à une requête de déco.
         try {
             if (disconnecting) {
-                this.next = new InetSocketAddress(InetAddress.getLocalHost(), this.portUDP);
-                this.tcpserv.next = this.next;
+                setNext("127.0.0.1",4343);
                 connected = false;
             }
         }

@@ -69,6 +69,8 @@ public class Invite{
             }
             else {
                 switch(cmd){
+                    case "info":
+                        System.out.println("Connecté à "+entite.next.getHostName()+":"+entite.next.getPort());
                     case "test": String tt = sc.nextLine();
                         System.out.println(Entity.getType(tt));
                         System.out.println(Entity.getIDM(tt));
