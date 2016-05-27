@@ -30,7 +30,6 @@ public class ServiceUDP implements Runnable{
             while(running){
                 dso.receive(dp);
                 String str = new String(dp.getData(),0,dp.getLength());
-                System.out.println(str);
                 e.handle(str);//Renvoie la string dans l'entité.
             }
         }

@@ -31,6 +31,7 @@ public class Entity {
         return parseur[0]+"."+parseur[1]+"."+parseur[2]+"."+parseur[3];
     }
 
+
     public static String portToNW(int p){
         String s = ""+p;
         while(s.length()<4){
@@ -220,7 +221,7 @@ public class Entity {
     public void disconnect(){//À appeler lorsqu'on attend une réponse à une requête de déco.
         try {
             if (disconnecting) {
-                setNext("127.0.0.1",4343);
+                setNext(Invite.getIPv4InetAddress().getHostAddress(),4343);
                 connected = false;
             }
         }
@@ -288,7 +289,7 @@ public class Entity {
     }
 
     public static String getIDM(String msg){
-        return msg.substring(5,13);
+        return msg.substring(5,12);
     }
     public static String getIpMsg(String msg,int offset){
         return msg.substring(offset,offset+15);
