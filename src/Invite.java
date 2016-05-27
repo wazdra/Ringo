@@ -70,7 +70,7 @@ public class Invite{
             else {
                 switch(cmd){
                     case "test": String tt = sc.nextLine();
-                        System.out.println(Entity.ipToNW(tt));
+                        System.out.println(tt.substring(5,13));
                         break;
                     case "help" : System.out.println("Commandes disponibles : \n"+
                             "- connect [ip]\n"+

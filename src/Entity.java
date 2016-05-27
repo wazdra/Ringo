@@ -42,7 +42,7 @@ public class Entity {
     protected ArrayList<String> listIDS; //C'est la liste des messages en attente de récupération.
     protected ServiceTCP tcpserv;
     protected String ownip;
-    protected long id; //Une des particularités de java : un long fait toujours 8 bytes.
+    protected String id; //Une des particularités de java : un long fait toujours 8 bytes.
     protected int portUDP; // < 9999
     protected boolean connected;
     protected boolean duplicated; //Indique si l'entité est en duplication
@@ -112,7 +112,7 @@ public class Entity {
     
 
     public Entity(String ip,int portTCP, int portUDP){
-        this.id = generateIDM();
+        this.id = generateIDMs();
         this.portUDP = portUDP;
         this.tcpserv = new ServiceTCP(portTCP,portUDP);
         this.dupl = null;
@@ -175,9 +175,10 @@ public class Entity {
 
     public void sendDcRequest(){
         if(connected){
-            sendUDP("GBYE "+(new String(longToBytes(id),0,8))+" "+ipToNW(ownip)+" "+portToNW(portUDP)+" "+ipToNW(next.getHostName())+" "+portToNW(next.getPort()));
+            sendUDP("GBYE "+id+" "+ipToNW(ownip)+" "+portToNW(portUDP)+" "+ipToNW(next.getHostName())+" "+portToNW(next.getPort()));
         }
     }
+
     public void disconnect(){//À appeler lorsqu'on attend une réponse à une requête de déco.
         try{
             this.next = new InetSocketAddress(InetAddress.getLocalHost(),this.portUDP);
@@ -188,6 +189,11 @@ public class Entity {
             System.out.print("Erreur dans disconnect : ");
             e.printStackTrace();
         }
+    }
+
+    public String generateIDMs(){
+        String s = new String(longToBytes(generateIDM()),0,8);
+        return s;
     }
     public long generateIDM(){//génération de l'identifiant pseudo-unique. Il servira aussi bien aux machines qu'aux messages
 	/* On utilisera 5 bytes de temps, donné par java, à la milliseconde près.
@@ -288,18 +294,32 @@ public class Entity {
     }
 
     public void handle(String str){
-        switch(str.substring(0,4)){//TO DO
-            case "APPL":handleAPPL(str);
-                break;
-            case "WHOS":
-                break;
-            case "GBYE":
-                break;
-            case "EYBG":disconnect();
-                break;
-            case "TEST":
-                break;
-            default:
+        if(listIDS.contains(str.substring(5,13))){//gérer messages envoyés.
+            if(str.substring(0,4).equals("EYBG")){
+                disconnect();
+            }
+            else if(str.substring(0,4).equals("TEST")){
+                //Arrêter la procédure de test.
+            }
+            listIDS.remove(str.substring(5,13));
+        }
+        else {
+            switch (str.substring(0, 4)) {//TO DO
+                case "APPL":
+                    handleAPPL(str);
+                    break;
+                case "WHOS":
+                    sendUDP(str);
+                    sendUDP("MEMB " + generateIDMs());
+                    break;
+                case "GBYE":
+                    break;
+                case "EYBG":
+                    break;
+                case "TEST":
+                    break;
+                default:
+            }
         }
     }
     public void handleAPPL(String str){
