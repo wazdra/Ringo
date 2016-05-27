@@ -81,10 +81,12 @@ public class Entity {
     }
     public class ServiceTCP implements Runnable{
         public int portTCP;
+        public Entity ent;
         public InetSocketAddress next;
         protected InetSocketAddress multidif; // Le port UDP de multi dif < 9999
         public boolean duplicated;
-        public ServiceTCP(int portTCP,int portUDP){
+        public ServiceTCP(int portTCP,int portUDP, Entity en){
+            ent = en;
             try{
                 multidif = new InetSocketAddress("255.255.255.255",12345);
             }
@@ -118,8 +120,9 @@ public class Entity {
                     if(!ts[0].equals("NEWC")){
                         throw new ConnectionException("Mauvais comportement côté serveur, attendait NEWC");
                     }
-                    this.next = new InetSocketAddress(ts[1],Integer.parseInt(ts[2]));
+                    ent.setNext(ts[1],Integer.parseInt(ts[2]));
                     pw.println("ACKC");
+                    setConnected(true);
                     pw.flush();
                     pw.close();
                     br.close();
@@ -141,7 +144,7 @@ public class Entity {
         this.listIDS = new ArrayList<>();
         enabledApps.add(new ListItemApp("DIFF####","message",new Message(this)));
         this.portUDP = portUDP;
-        this.tcpserv = new ServiceTCP(portTCP,portUDP);
+        this.tcpserv = new ServiceTCP(portTCP,portUDP,this);
         this.udpserv = new ServiceUDP(portUDP,next,this);
         this.dupl = null;
         this.multidif = null;
@@ -153,7 +156,9 @@ public class Entity {
         t.start();
         tt.start();
     }
-
+    public void setConnected(Boolean b){
+        connected=b;
+    }
     public synchronized void setNext(String ip,int portUDP){
         next = new InetSocketAddress(ip,portUDP);
         tcpserv.next = this.next;
