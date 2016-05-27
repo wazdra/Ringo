@@ -59,11 +59,10 @@ public class Entity {
     public Application getApp(int index){
         return enabledApps.get(index).app;
     }
-    public int getIdApp(String appId){
+    public int getIndexApp(String appId){
         return enabledApps.indexOf(appId);
     }
     public class ServiceTCP implements Runnable{
-
         public int portTCP;
         public InetSocketAddress next;
         protected InetSocketAddress multidif; // Le port UDP de multi dif < 9999
@@ -91,8 +90,10 @@ public class Entity {
                     Socket s = ss.accept();
                     PrintWriter pw = new PrintWriter(new OutputStreamWriter(s.getOutputStream()));
                     BufferedReader br = new BufferedReader(new InputStreamReader(s.getInputStream()));
-                    System.out.println("WELC "+ipToNW(next.getAddress().getHostAddress())+" "+ portToNW(next.getPort())+" "+ipToNW(multidif.getAddress().getHostAddress())+" "+portToNW(multidif.getPort()));
-                    pw.println("WELC "+ipToNW(next.getAddress().getHostAddress())+" "+ portToNW(next.getPort())+" "+ipToNW(multidif.getAddress().getHostAddress())+" "+portToNW(multidif.getPort()));
+                    System.out.println("WELC "+ipToNW(next.getAddress().getHostAddress())+" "+ portToNW(next.getPort())+
+                            " "+ipToNW(multidif.getAddress().getHostAddress())+" "+portToNW(multidif.getPort()));
+                    pw.println("WELC "+ipToNW(next.getAddress().getHostAddress())+" "+ portToNW(next.getPort())+" "+
+                            ipToNW(multidif.getAddress().getHostAddress())+" "+portToNW(multidif.getPort()));
                     pw.flush();
                     String msg = br.readLine();
                     System.out.println(msg);
