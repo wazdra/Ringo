@@ -9,7 +9,7 @@ public class Invite{
         String os = System.getProperty("os.name").toLowerCase();
 
         if(os.indexOf("nix") >= 0 || os.indexOf("nux") >= 0) {
-            NetworkInterface ni = NetworkInterface.getByName("eth0");
+            NetworkInterface ni = NetworkInterface.getByName("wlan0");
 
             Enumeration<InetAddress> ias = ni.getInetAddresses();
 
