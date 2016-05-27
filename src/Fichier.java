@@ -1,6 +1,9 @@
 import java.util.*;
 import java.io.File.*;
+import java.nio.file.Files;
 import java.io.*;
+import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
 
 public class Fichier extends Application{
     public final int maxSize = 466;
@@ -47,6 +50,10 @@ public class Fichier extends Application{
     }
 
     public static String getIdTransSEN(String msg){
+        return msg.substring(27); // TODO
+    }
+
+    public static String getContentSEN(String msg){
         return msg.substring(27); // TODO
     }
 
@@ -110,7 +117,11 @@ public class Fichier extends Application{
             case "SEN":
                 if (this.idTrans == getIdTransSEN(msg)){ // Si l'id de transition de message correspond
                     if (getNoMessSEN(msg) == this.numMessage){
-
+                        try {
+                            Files.write(Paths.get("transfert.txt"), (getContentSEN(msg)).getBytes(), StandardOpenOption.APPEND);
+                        }catch (IOException e) {
+                            
+                        }
                         this.numMessage++;
                     }
                     else{
@@ -128,7 +139,12 @@ public class Fichier extends Application{
         
     }
 
-    public void useApp(String msg){
-        
+    public void useApp(String nomFichier){
+        if (nomFichier.length() > 0 && nomFichier.length() <= 8){
+            entity.sendUDP(entity.getAppRequest(this.id, "REQ " + nomFichier.length() + " " + nomFichier));
+        }
+        else{
+            System.out.println("Nom du fichier trop long !");
+        }
     }
 }
